@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Escáner de Proxy y Host | TECHNO</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { overflow-x: hidden; width: 100%; }
+        body {
+            font-family: 'Share Tech Mono', 'Courier New', monospace;
+            background-color: #020a04; color: var(--text-color);
+            line-height: 1.5; min-height: 100vh; padding: 10px; padding-bottom: 100px;
+            position: relative; transition: background 0.4s ease, color 0.4s ease;
+        }
+        :root {
+            --primary: #00ff66; --primary-dark: #00cc52; --primary-glow: rgba(0, 255, 102, 0.6);
+            --bg-panel: rgba(2, 12, 5, 0.92); --bg-input: #021005; --bg-dark: #020a04;
+            --text-color: #b8ffcc; --text-muted: #7dffaa; --border-color: #00ff66;
+            --accent-blue: #00aaff; --accent-yellow: #ffaa00; --accent-purple: #bb66ff;
+            --accent-cyan: #00ffff; --accent-red: #ff5555; --whatsapp: #25d366; --youtube: #ff0000;
+        }
+        body.theme-red { --primary: #ff3b3b; --primary-dark: #cc2222; --primary-glow: rgba(255, 59, 59, 0.6); --bg-panel: rgba(12, 2, 2, 0.92); --bg-input: #100202; --bg-dark: #0a0202; --text-color: #ffcccc; --text-muted: #ff9999; --border-color: #ff3b3b; }
+        body.theme-blue { --primary: #00aaff; --primary-dark: #0088cc; --primary-glow: rgba(0, 170, 255, 0.6); --bg-panel: rgba(2, 8, 15, 0.92); --bg-input: #020a10; --bg-dark: #020810; --text-color: #b8ddff; --text-muted: #7dbbff; --border-color: #00aaff; }
+        body.theme-purple { --primary: #bb66ff; --primary-dark: #9944dd; --primary-glow: rgba(187, 102, 255, 0.6); --bg-panel: rgba(10, 2, 15, 0.92); --bg-input: #0a0210; --bg-dark: #08020a; --text-color: #ddc4ff; --text-muted: #c499ff; --border-color: #bb66ff; }
+        body.theme-black-white { --primary: #ffffff; --primary-dark: #cccccc; --primary-glow: rgba(255, 255, 255, 0.7); --bg-panel: rgba(5, 5, 5, 0.95); --bg-input: #0a0a0a; --bg-dark: #000000; --text-color: #ffffff; --text-muted: #cccccc; --border-color: #ffffff; }
+        body.theme-paraguay { --primary: #ffffff; --primary-dark: #cccccc; --primary-glow: rgba(255, 255, 255, 0.7); --bg-panel: rgba(10, 5, 5, 0.95); --bg-input: #0a0505; --bg-dark: #050202; --text-color: #ffffff; --text-muted: #dddddd; --border-color: #ffffff; --accent-blue: #0038a8; --accent-yellow: #d52b1e; }
+
+        #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.22; pointer-events: none; }
+        .main-content { position: relative; z-index: 10; max-width: 1600px; margin: 0 auto; }
+
+        h1, h2, h3 { font-family: 'Rajdhani', sans-serif; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--primary); text-shadow: 0 0 8px var(--primary-glow), 0 0 20px var(--primary-glow); margin-bottom: 15px; }
+        h1 { font-size: 1.4rem; text-align: center; margin-bottom: 20px; border-bottom: 2px solid var(--primary); display: inline-block; padding: 8px 20px; letter-spacing: 3px; background: rgba(0, 0, 0, 0.8); box-shadow: 0 0 25px var(--primary), inset 0 0 18px var(--primary); }
+        .paraguay-title { position: relative; }
+        .paraguay-title::before, .paraguay-title::after { content: ''; position: absolute; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, #d52b1e 33%, #ffffff 33%, #ffffff 66%, #0038a8 66%); }
+        .paraguay-title::before { top: 0; border-radius: 2px 2px 0 0; }
+        .paraguay-title::after { bottom: 0; border-radius: 0 0 2px 2px; }
+        h2 { font-size: 1.05rem; display: flex; align-items: center; gap: 8px; border-left: 4px solid var(--primary); padding-left: 10px; background: linear-gradient(90deg, var(--primary-glow) 0%, transparent 100%); opacity: 0.9; margin-bottom: 15px; }
+        h2 i { color: var(--primary); font-size: 1.1rem; }
+
+        .container { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        @media (min-width: 1024px) { .container { gap: 25px; } h1 { font-size: 2.2rem; letter-spacing: 6px; } h2 { font-size: 1.4rem; } }
+
+        .panel { background: var(--bg-panel); backdrop-filter: blur(8px); border: 1px solid var(--border-color); padding: 15px; box-shadow: 0 0 22px var(--primary-glow), inset 0 0 12px rgba(0, 255, 102, 0.06); }
+
+        label { display: block; margin-bottom: 6px; color: var(--text-muted); font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; }
+        input[type="file"], input[type="number"], input[type="text"], input[type="search"], textarea { width: 100%; padding: 10px; margin-bottom: 12px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-color); font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; outline: none; }
+        input:focus, textarea:focus { border-color: var(--primary); box-shadow: 0 0 12px var(--primary-glow); }
+        textarea { min-height: 80px; resize: vertical; }
+
+        .tabs { display: flex; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); overflow-x: auto; }
+        .tab-btn { padding: 8px 14px; background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; position: relative; white-space: nowrap; }
+        .tab-btn.active { color: var(--primary); text-shadow: 0 0 10px var(--primary); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 3px; background: var(--primary); box-shadow: 0 0 12px var(--primary); }
+        .tab-content { display: none; margin-bottom: 12px; }
+        .tab-content.active { display: block; animation: fadeIn 0.25s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .data-container { max-height: 180px; overflow-y: auto; margin-bottom: 12px; background: var(--bg-input); border: 1px solid var(--border-color); padding: 4px; }
+        .proxy-item, .host-item, .combo-item { padding: 8px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem; color: var(--text-color); word-break: break-all; display: flex; justify-content: space-between; align-items: center; }
+        .proxy-item:last-child, .host-item:last-child, .combo-item:last-child { border-bottom: none; }
+        .remove-btn { background: var(--primary); border: none; color: #000; width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-left: 8px; font-weight: bold; }
+
+        .buttons { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .buttons button { flex: 1 1 auto; min-width: 70px; padding: 10px 6px; background: var(--bg-panel); border: 1px solid var(--border-color); color: var(--primary); cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+
+        .btn-container { display: flex; flex-direction: column; gap: 8px; margin: 15px 0; }
+        .btn { padding: 12px 14px; border: 1px solid transparent; color: #fff; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+        .btn-start { background: var(--bg-panel); border-color: var(--primary); color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+        .btn-start.running { background: #2a1a05; border-color: #ffaa00; color: #ffaa00; box-shadow: 0 0 20px rgba(255, 170, 0, 0.5); }
+        .btn-copy { background: #051a2a; border-color: var(--accent-blue); color: var(--accent-blue); }
+        .btn-clear { background: #2a0a0a; border-color: var(--accent-red); color: var(--accent-red); }
+        .btn-stop { background: #2a1a05; border-color: var(--accent-yellow); color: var(--accent-yellow); }
+        .btn-add { background: #1a1a00; border-color: var(--accent-yellow); color: var(--accent-yellow); padding: 10px; cursor: pointer; font-family: inherit; font-weight: bold; }
+        .btn-extra { background: #1a0a2a; border-color: var(--accent-purple); color: var(--accent-purple); }
+        .btn-import { background: #001a1a; border-color: var(--accent-cyan); color: var(--accent-cyan); }
+        .btn-download { background: #0a2a1a; border-color: #00ff88; color: #00ff88; padding: 14px; cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+
+        .btn-music-control {
+            background: #1a0a2a;
+            border: 1px solid var(--accent-purple);
+            color: var(--accent-purple);
+            padding: 12px 14px;
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            margin-top: 8px;
+            box-shadow: 0 0 15px rgba(187, 102, 255, 0.3);
+            transition: all 0.2s ease;
+        }
+        .btn-music-control:active { background: var(--accent-purple); color: #000; }
+        .btn-music-control.paused {
+            background: #2a0a0a;
+            border-color: var(--accent-red);
+            color: var(--accent-red);
+            box-shadow: 0 0 15px rgba(255, 85, 85, 0.3);
+        }
+
+        #status-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); margin-bottom: 12px; }
+        #status-bar span { display: flex; flex-direction: column; text-align: center; font-size: 0.65rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px; }
+        #status-bar span span { font-weight: bold; color: var(--primary); font-size: 0.95rem; margin-top: 2px; text-shadow: 0 0 8px var(--primary-glow); }
+
+        #activity, #hits { min-height: 150px; max-height: 250px; overflow-y: auto; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; white-space: pre-wrap; word-break: break-word; }
+        .log-info { color: var(--accent-blue); margin-bottom: 5px; padding-left: 8px; border-left: 3px solid var(--accent-blue); }
+        .log-hit { color: var(--primary); margin-bottom: 5px; padding-left: 8px; border-left: 3px solid var(--primary); }
+        .log-fail { color: var(--accent-red); margin-bottom: 5px; padding-left: 8px; border-left: 3px solid var(--accent-red); }
+
+        .status { position: fixed; bottom: 100px; left: 15px; right: 15px; padding: 12px 16px; background: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-color); font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; z-index: 1000; box-shadow: 0 0 30px var(--primary-glow); pointer-events: none; text-align: center; }
+        .status.info { border-color: var(--accent-blue); color: var(--accent-blue); opacity: 1; transform: translateY(0); }
+        .status.success { border-color: var(--primary); color: var(--primary); opacity: 1; transform: translateY(0); }
+        .status.error { border-color: var(--accent-red); color: var(--accent-red); opacity: 1; transform: translateY(0); }
+
+        .file-info { margin-top: 4px; margin-bottom: 10px; font-size: 0.75rem; color: var(--text-muted); }
+        .combo-count { display: inline-block; margin-left: 6px; padding: 1px 6px; background: var(--bg-panel); border: 1px solid var(--border-color); color: var(--primary); font-size: 0.65rem; font-weight: bold; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--primary); }
+
+        .header-wrapper { text-align: center; margin-bottom: 15px; }
+        .quick-add-panel { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+        .quick-add-panel input { margin-bottom: 0; }
+
+        .theme-switcher { position: fixed; top: 10px; right: 10px; z-index: 2000; display: none; gap: 6px; padding: 8px; background: var(--bg-panel); border: 1px solid var(--border-color); box-shadow: 0 0 20px var(--primary-glow); backdrop-filter: blur(8px); flex-wrap: wrap; max-width: 200px; }
+        .theme-switcher.visible { display: flex; }
+        .theme-dot { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #fff; cursor: pointer; transition: transform 0.2s ease; }
+        .theme-dot.green { background: #00ff66; } .theme-dot.red { background: #ff3b3b; } .theme-dot.blue { background: #00aaff; } .theme-dot.purple { background: #bb66ff; }
+        .theme-dot.blue-red { background: linear-gradient(135deg, #00aaff 50%, #ff3b3b 50%); } .theme-dot.black-white { background: linear-gradient(135deg, #000 50%, #fff 50%); }
+        .theme-dot.paraguay { background: linear-gradient(135deg, #d52b1e 33%, #ffffff 33%, #ffffff 66%, #0038a8 66%); }
+        .theme-dot.active { border-color: #fff; box-shadow: 0 0 15px currentColor, 0 0 25px currentColor; transform: scale(1.15); }
+
+        .settings-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 3000; display: none; align-items: center; justify-content: center; padding: 15px; backdrop-filter: blur(5px); }
+        .settings-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
+        .settings-panel { background: var(--bg-panel); border: 1px solid var(--primary); width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 0 40px var(--primary-glow); position: relative; }
+        .settings-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        .settings-header h2 { margin-bottom: 0; border-left: none; padding-left: 0; background: none; }
+        .close-settings { background: transparent; border: 1px solid var(--accent-red); color: var(--accent-red); width: 32px; height: 32px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; }
+        .settings-section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px dashed rgba(255,255,255,0.1); }
+        .settings-section:last-child { border-bottom: none; margin-bottom: 0; }
+        .settings-section h3 { font-size: 0.95rem; color: var(--primary); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .settings-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; gap: 10px; }
+        .settings-row label { margin-bottom: 0; flex: 1; font-size: 0.8rem; text-transform: none; letter-spacing: 0.5px; }
+        .settings-row .toggle-btn { background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-muted); padding: 6px 14px; cursor: pointer; font-family: inherit; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; min-width: 60px; }
+        .settings-row .toggle-btn.on { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
+        .settings-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .settings-actions button { flex: 1; padding: 12px; cursor: pointer; font-family: inherit; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; border: 1px solid var(--border-color); }
+        .settings-actions .btn-save { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+        .settings-actions .btn-reset { background: transparent; color: var(--accent-red); border-color: var(--accent-red); }
+
+        .settings-fab { position: fixed; bottom: 100px; left: 20px; width: 50px; height: 50px; border-radius: 50%; background: var(--bg-panel); border: 2px solid var(--primary); color: var(--primary); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px var(--primary-glow); z-index: 1500; }
+        .whatsapp-fab { position: fixed; bottom: 100px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--whatsapp); border: 2px solid #fff; color: #fff; font-size: 1.6rem; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 25px rgba(37, 211, 102, 0.6); z-index: 1500; text-decoration: none; }
+        .youtube-fab { position: fixed; bottom: 165px; right: 20px; width: 56px; height: 56px; border-radius: 50%; background: var(--youtube); border: 2px solid #fff; color: #fff; font-size: 1.5rem; cursor: pointer; display: none; align-items: center; justify-content: center; box-shadow: 0 0 25px rgba(255, 0, 0, 0.6); z-index: 1500; text-decoration: none; }
+        .youtube-fab.active { display: flex; }
+
+        .video-fab {
+            position: fixed;
+            bottom: 230px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff3b3b, #ff8800);
+            border: 2px solid #fff;
+            color: #fff;
+            font-size: 1.4rem;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 25px rgba(255, 59, 59, 0.6);
+            z-index: 1500;
+            transition: all 0.3s ease;
+        }
+        .video-fab.active { display: flex; }
+        .video-fab:active { transform: scale(0.92); }
+
+        .test-status { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 8px; flex-shrink: 0; }
+        .test-status.online { background: #00ff66; box-shadow: 0 0 8px #00ff66; }
+        .test-status.offline { background: #ff5555; box-shadow: 0 0 8px #ff5555; }
+        .test-status.testing { background: #ffaa00; box-shadow: 0 0 8px #ffaa00; animation: pulse 0.8s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+        .music-indicator { position: fixed; top: 10px; left: 10px; z-index: 2000; display: flex; align-items: center; gap: 8px; padding: 8px 14px; background: var(--bg-panel); border: 1px solid var(--primary); color: var(--primary); font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; box-shadow: 0 0 20px var(--primary-glow); backdrop-filter: blur(8px); opacity: 0; transform: translateY(-20px); pointer-events: none; }
+        .music-indicator.active { opacity: 1; transform: translateY(0); }
+        .music-bars { display: flex; align-items: flex-end; gap: 2px; height: 16px; }
+        .music-bars span { display: block; width: 3px; background: var(--primary); animation: musicBar 0.8s ease-in-out infinite; }
+        .music-bars span:nth-child(1) { animation-delay: 0s; height: 6px; } .music-bars span:nth-child(2) { animation-delay: 0.15s; height: 12px; } .music-bars span:nth-child(3) { animation-delay: 0.3s; height: 8px; } .music-bars span:nth-child(4) { animation-delay: 0.45s; height: 14px; } .music-bars span:nth-child(5) { animation-delay: 0.6s; height: 7px; }
+        @keyframes musicBar { 0%, 100% { transform: scaleY(0.4); } 50% { transform: scaleY(1); } }
+
+        .paraguay-flag { display: inline-block; width: 30px; height: 20px; background: linear-gradient(180deg, #d52b1e 33%, #ffffff 33%, #ffffff 66%, #0038a8 66%); border-radius: 2px; margin-right: 8px; vertical-align: middle; }
+
+        .music-stations { display: flex; gap: 8px; margin: 15px 0; flex-wrap: wrap; }
+        .music-stations .station-btn { flex: 1 1 auto; min-width: 80px; padding: 12px 10px; background: var(--bg-panel); border: 1px solid var(--accent-purple); color: var(--accent-purple); cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .music-stations .station-btn.active { background: var(--accent-purple); color: #000; box-shadow: 0 0 20px rgba(187, 102, 255, 0.6); }
+
+        .progress-container { margin: 15px 0; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); }
+        .progress-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1px; }
+        .progress-label .percent { color: var(--primary); font-weight: bold; }
+        .progress-bar { width: 100%; height: 18px; background: var(--bg-dark); border: 1px solid var(--border-color); overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--accent-cyan)); transition: width 0.3s ease; }
+
+        .combo-mode-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+        .combo-mode-toggle .mode-btn { flex: 1; padding: 10px; background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-muted); cursor: pointer; font-family: inherit; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; }
+        .combo-mode-toggle .mode-btn.active { background: var(--primary); color: #000; border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
+
+        .random-combo-info { padding: 10px; background: var(--bg-input); border: 1px dashed var(--accent-yellow); color: var(--accent-yellow); font-size: 0.8rem; margin-bottom: 12px; text-align: center; }
+
+        .combo-gen-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; margin-bottom: 12px; }
+        .combo-gen-buttons .gen-btn { padding: 12px 8px; background: var(--bg-panel); border: 1px solid var(--accent-yellow); color: var(--accent-yellow); cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .combo-gen-buttons .gen-btn.active { background: var(--accent-yellow); color: #000; box-shadow: 0 0 20px rgba(255, 170, 0, 0.6); }
+
+        .combo-qty-input { display: flex; gap: 8px; align-items: center; margin-bottom: 12px; }
+        .combo-qty-input input { flex: 1; margin-bottom: 0; padding: 10px; background: var(--bg-input); border: 1px solid var(--accent-cyan); color: var(--text-color); font-family: 'Share Tech Mono', monospace; font-size: 0.9rem; outline: none; text-align: center; }
+        .combo-qty-input .qty-btn { padding: 10px 14px; background: var(--bg-panel); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); cursor: pointer; font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; font-weight: bold; white-space: nowrap; }
+
+        .audio-spectrum { position: fixed; bottom: 0; left: 0; width: 100%; height: 80px; z-index: 500; display: flex; align-items: flex-end; justify-content: center; gap: 2px; padding: 0 5px 5px 5px; pointer-events: none; opacity: 0; transition: opacity 0.5s ease; background: linear-gradient(180deg, transparent 0%, rgba(0,0,0,0.85) 100%); }
+        .audio-spectrum.active { opacity: 1; }
+        .audio-spectrum .bar { flex: 1; max-width: 8px; min-width: 2px; background: linear-gradient(180deg, var(--primary), var(--accent-cyan)); border-radius: 2px 2px 0 0; transition: height 0.08s ease; height: 2px; }
+
+        .expire-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(10px); }
+        .expire-overlay.active { display: flex; }
+        .expire-card { background: var(--bg-panel); border: 2px solid var(--accent-red); padding: 30px 25px; max-width: 450px; width: 100%; text-align: center; box-shadow: 0 0 60px rgba(255, 85, 85, 0.6); }
+        .expire-card .expire-icon { font-size: 3.5rem; color: var(--accent-red); margin-bottom: 15px; }
+        .expire-card h2 { color: var(--accent-red); font-size: 1.3rem; border: none; background: none; padding: 0; margin-bottom: 15px; justify-content: center; }
+        .expire-card p { color: var(--text-color); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.6; }
+        .expire-card .expire-link { display: inline-block; padding: 14px 28px; background: var(--whatsapp); color: #fff; text-decoration: none; font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; font-size: 0.9rem; border: 2px solid #fff; box-shadow: 0 0 25px rgba(37, 211, 102, 0.7); border-radius: 4px; }
+        .expire-card .expire-link i { margin-right: 8px; }
+
+        .video-modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 4000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            backdrop-filter: blur(8px);
+        }
+        .video-modal-overlay.open { display: flex; animation: fadeIn 0.25s ease; }
+        .video-modal-panel {
+            background: var(--bg-panel);
+            border: 2px solid var(--primary);
+            width: 100%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 15px;
+            box-shadow: 0 0 50px var(--primary-glow);
+            position: relative;
+        }
+        .video-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+        .video-modal-header h3 {
+            margin-bottom: 0;
+            font-size: 1rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .close-video-modal {
+            background: transparent;
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            width: 32px; height: 32px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-video-modal:active { background: var(--accent-red); color: #000; }
+
+        .video-search-container {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        .video-search-container input {
+            width: 100%;
+            padding: 10px 10px 10px 36px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.9rem;
+            outline: none;
+            margin-bottom: 0;
+        }
+        .video-search-container input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+        .video-search-container .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--primary);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+        .video-search-container .sort-btn {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            color: var(--primary);
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        .video-search-container .sort-btn:active {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .video-modal-panel video {
+            width: 100%;
+            max-height: 65vh;
+            background: #000;
+            border: 1px solid var(--border-color);
+            display: block;
+            margin-top: 12px;
+        }
+        .video-channel-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
+            margin-bottom: 12px;
+            max-height: 180px;
+            overflow-y: auto;
+            padding: 4px;
+        }
+        .video-channel-selector .vc-btn {
+            padding: 10px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            cursor: pointer;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-align: center;
+            word-break: break-word;
+            min-height: 42px;
+        }
+        .video-channel-selector .vc-btn.active {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+        .video-no-channels {
+            text-align: center;
+            padding: 30px 15px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .video-no-channels i {
+            font-size: 3rem;
+            color: var(--accent-red);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .version-info { text-align: center; font-size: 0.75rem; color: var(--text-muted); padding: 15px 0; letter-spacing: 1px; border-top: 1px dashed rgba(255,255,255,0.1); margin-top: 15px; }
+        .version-info .version-num { color: var(--primary); font-weight: bold; }
+
+        .loading-banner { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--bg-panel); border: 2px solid var(--primary); padding: 20px 30px; z-index: 5000; color: var(--primary); font-family: 'Share Tech Mono', monospace; text-align: center; box-shadow: 0 0 40px var(--primary-glow); display: none; }
+        .loading-banner.active { display: block; }
+
+        @media (min-width: 600px) {
+            .btn-container { flex-direction: row; }
+            #status-bar { grid-template-columns: repeat(5, 1fr); }
+            .combo-gen-buttons { grid-template-columns: 1fr 1fr; }
+            .video-channel-selector { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); max-height: 220px; }
+        }
+        @media (min-width: 1024px) {
+            body { padding: 20px; padding-bottom: 110px; }
+            .panel { padding: 20px; }
+            .status { left: auto; right: 30px; bottom: 120px; text-align: left; max-width: 400px; }
+            .settings-fab { bottom: 120px; left: 30px; }
+            .whatsapp-fab { bottom: 120px; right: 30px; }
+            .youtube-fab { bottom: 200px; right: 30px; }
+            .video-fab { bottom: 270px; right: 30px; }
+            .combo-gen-buttons { grid-template-columns: repeat(4, 1fr); }
+        }
+    </style>
+</head>
+<body class="theme-green">
+    <canvas id="matrix-canvas"></canvas>
+
+    <div class="loading-banner" id="loadingBanner">
+        <i class="fas fa-spinner fa-spin" style="font-size:2rem; margin-bottom:10px;"></i><br>
+        Cargando configuración remota...
+    </div>
+
+    <div class="expire-overlay" id="expireOverlay">
+        <div class="expire-card">
+            <div class="expire-icon"><i class="fas fa-exclamation-triangle"></i></div>
+            <h2>HTML EXPIRADO</h2>
+            <p>Esta versión del HTML ya no está disponible.<br>Descarga la nueva versión en el canal de abajo:</p>
+            <a class="expire-link" id="expireLink" href="#" target="_blank" rel="noopener">
+                <i class="fab fa-whatsapp"></i> DESCARGAR NUEVA VERSIÓN
+            </a>
+        </div>
+    </div>
+
+    <div class="video-modal-overlay" id="videoModalOverlay">
+        <div class="video-modal-panel">
+            <div class="video-modal-header">
+                <h3><i class="fas fa-tv"></i> Canales de Video</h3>
+                <button class="close-video-modal" onclick="closeVideoModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="video-search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="search" id="videoSearchInput" placeholder="Buscar canal..." oninput="filterVideoChannels(this.value)">
+                <button class="sort-btn" id="videoSortBtn" onclick="toggleVideoSort()" title="Ordenar A-Z / Z-A">
+                    <i class="fas fa-sort-alpha-down" id="videoSortIcon"></i>
+                </button>
+            </div>
+            <div class="video-channel-selector" id="videoChannelSelector"></div>
+            <video id="videoPlayer" controls playsinline></video>
+            <div class="video-no-channels" id="videoNoChannels" style="display:none;">
+                <i class="fas fa-tv"></i>
+                <p>No hay canales disponibles</p>
+                <small style="color: var(--text-muted); font-size: 0.75rem;">Agrega canales m3u8 en el JSON remoto</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="music-indicator" id="musicIndicator">
+        <div class="music-bars"><span></span><span></span><span></span><span></span><span></span></div>
+        <span id="musicLabel">MÚSICA ON</span>
+    </div>
+
+    <div class="theme-switcher" id="themeSwitcher">
+        <div class="theme-dot green active" onclick="setTheme('green', event)" title="Verde"></div>
+        <div class="theme-dot red" onclick="setTheme('red', event)" title="Rojo"></div>
+        <div class="theme-dot blue" onclick="setTheme('blue', event)" title="Azul"></div>
+        <div class="theme-dot purple" onclick="setTheme('purple', event)" title="Morado"></div>
+        <div class="theme-dot blue-red" onclick="setTheme('blue-red', event)" title="Azul + Rojo"></div>
+        <div class="theme-dot black-white" onclick="setTheme('black-white', event)" title="Negro + Blanco"></div>
+        <div class="theme-dot paraguay" onclick="setTheme('paraguay', event)" title="Paraguay"></div>
+    </div>
+
+    <button class="settings-fab" id="settingsFab" onclick="openSettings()" title="Ajustes">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <button class="video-fab" id="videoFab" onclick="openVideoModal()" title="Ver Canales">
+        <i class="fas fa-tv"></i>
+    </button>
+
+    <a class="youtube-fab" id="youtubeFab" href="#" target="_blank" rel="noopener" title="Canal de YouTube">
+        <i class="fab fa-youtube"></i>
+    </a>
+
+    <a class="whatsapp-fab" href="https://whatsapp.com/channel/0029Vat0QigLikgCC1xikp1a" target="_blank" rel="noopener" title="Entrar al grupo WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <div class="audio-spectrum" id="audioSpectrum"></div>
+
+    <div class="settings-overlay" id="settingsOverlay">
+        <div class="settings-panel">
+            <div class="settings-header">
+                <h2><i class="fas fa-sliders-h"></i> Ajustes</h2>
+                <button class="close-settings" onclick="closeSettings()"><i class="fas fa-times"></i></button>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-music"></i> Música</h3>
+                <div class="settings-row">
+                    <label><i class="fas fa-play-circle"></i> Reproducir al iniciar:</label>
+                    <button class="toggle-btn on" id="musicToggle" onclick="toggleMusicSetting()">ON</button>
+                </div>
+                <div class="settings-row">
+                    <label><i class="fas fa-volume-up"></i> Volumen:</label>
+                    <input type="range" id="volumeSlider" min="0" max="100" value="35" oninput="updateVolume(this.value)" style="flex:1; margin:0; padding:0; height:6px; background:var(--bg-input); border:1px solid var(--border-color); accent-color:var(--primary);">
+                </div>
+                <label style="margin-top:10px;"><i class="fas fa-broadcast-tower"></i> Estación:</label>
+                <div class="music-stations" id="musicStationsContainer"></div>
+                <button class="btn-music-control" id="musicPauseBtn" onclick="toggleMusicPlayPause()">
+                    <i class="fas fa-pause"></i> PAUSAR MÚSICA
+                </button>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-file-import"></i> Importar Listas</h3>
+                <label><i class="fas fa-shield-alt"></i> Proxies:</label>
+                <textarea id="proxyImportArea" placeholder="Pega la lista aquí (uno por línea)&#10;Ej: 192.168.0.1:8080"></textarea>
+                <div class="buttons" style="margin-bottom:12px;">
+                    <button onclick="importProxiesFromText()" class="btn-import"><i class="fas fa-file-import"></i> Texto</button>
+                    <button onclick="document.getElementById('proxyFileInput').click()" class="btn-import"><i class="fas fa-file-upload"></i> Archivo</button>
+                    <input type="file" id="proxyFileInput" accept=".txt" style="display:none" onchange="importProxiesFromFile(event)">
+                </div>
+                <label><i class="fas fa-desktop"></i> Hosts:</label>
+                <textarea id="hostImportArea" placeholder="Pega la lista aquí (uno por línea)&#10;Ej: dominio.com:8080"></textarea>
+                <div class="buttons" style="margin-bottom:0;">
+                    <button onclick="importHostsFromText()" class="btn-import"><i class="fas fa-file-import"></i> Texto</button>
+                    <button onclick="document.getElementById('hostFileInput').click()" class="btn-import"><i class="fas fa-file-upload"></i> Archivo</button>
+                    <input type="file" id="hostFileInput" accept=".txt" style="display:none" onchange="importHostsFromFile(event)">
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-users"></i> Combo</h3>
+                <div class="combo-mode-toggle">
+                    <button class="mode-btn active" id="comboModeRandom" onclick="setComboMode('random')">🎲 Random</button>
+                    <button class="mode-btn" id="comboModeFile" onclick="setComboMode('file')">📁 Archivo</button>
+                </div>
+                <div id="comboRandomPanel" class="random-combo-info">
+                    <i class="fas fa-dice"></i> Modo Random activo: elige el tipo de generación abajo.
+                    <div class="combo-gen-buttons">
+                        <button class="gen-btn" id="genName" onclick="setComboGenMode('name')">👤 Nombre</button>
+                        <button class="gen-btn" id="genNumber" onclick="setComboGenMode('number')">🔢 Número</button>
+                        <button class="gen-btn active" id="genLetter" onclick="setComboGenMode('letter')">🔤 Letra</button>
+                        <button class="gen-btn" id="genLetterNro" onclick="setComboGenMode('letternro')">🔠 LetraNro</button>
+                    </div>
+                    <div class="combo-qty-input">
+                        <input type="number" id="comboQty" placeholder="Cantidad" value="10" min="1" max="99999">
+                        <button class="qty-btn" onclick="setComboQty(10)">10</button>
+                        <button class="qty-btn" onclick="setComboQty(200)">200</button>
+                        <button class="qty-btn" onclick="setComboQty(1000)">1000</button>
+                    </div>
+                </div>
+                <div id="comboFilePanel" style="display:none;">
+                    <input type="file" id="combo" accept=".txt" onchange="handleComboUpload()" />
+                    <div id="comboInfo" class="file-info">Ningún archivo seleccionado</div>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-shield-alt"></i> Gestionar Proxies <span class="combo-count" id="proxyTotalSettings">0</span></h3>
+                <div class="data-container" id="proxyContainer" style="max-height: 150px;"></div>
+                <div class="settings-row">
+                    <label><i class="fas fa-plus-circle"></i> Agregar:</label>
+                    <div style="display:flex; gap:6px; flex:1;">
+                        <input type="text" id="newProxyInput" placeholder="IP:PUERTO" style="flex:1; margin-bottom:0; padding:6px 10px; font-size:0.85rem;" />
+                        <button class="btn-add" onclick="addProxy()" style="padding:6px 10px;">+</button>
+                    </div>
+                </div>
+                <div class="buttons" style="margin-top:10px;">
+                    <button onclick="testProxies()" class="btn-copy"><i class="fas fa-vial"></i> Probar</button>
+                    <button onclick="removeOfflineProxies()" class="btn-clear"><i class="fas fa-trash"></i> Quitar Offline</button>
+                    <button onclick="addRandomProxies(50)" class="btn-extra"><i class="fas fa-magic"></i> +50</button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-desktop"></i> Gestionar Hosts <span class="combo-count" id="hostTotalSettings">0</span></h3>
+                <div class="data-container" id="hostContainer" style="max-height: 150px;"></div>
+                <div class="settings-row">
+                    <label><i class="fas fa-plus-circle"></i> Agregar:</label>
+                    <div style="display:flex; gap:6px; flex:1;">
+                        <input type="text" id="newHostInput" placeholder="dominio.com:puerto" style="flex:1; margin-bottom:0; padding:6px 10px; font-size:0.85rem;" />
+                        <button class="btn-add" onclick="addHost()" style="padding:6px 10px;">+</button>
+                    </div>
+                </div>
+                <div class="buttons" style="margin-top:10px;">
+                    <button onclick="testHosts()" class="btn-copy"><i class="fas fa-vial"></i> Probar</button>
+                    <button onclick="removeOfflineHosts()" class="btn-clear"><i class="fas fa-trash"></i> Quitar Offline</button>
+                    <button onclick="addRandomHosts(20)" class="btn-extra"><i class="fas fa-magic"></i> +20</button>
+                </div>
+            </div>
+
+            <div class="settings-section">
+                <h3><i class="fas fa-palette"></i> Tema</h3>
+                <div class="settings-row">
+                    <label><i class="fas fa-circle"></i> Color del tema:</label>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <div class="theme-dot green active" onclick="setTheme('green', event)" style="width:28px;height:28px;"></div>
+                        <div class="theme-dot red" onclick="setTheme('red', event)" style="width:28px;height:28px;"></div>
+                        <div class="theme-dot blue" onclick="setTheme('blue', event)" style="width:28px;height:28px;"></div>
+                        <div class="theme-dot purple" onclick="setTheme('purple', event)" style="width:28px;height:28px;"></div>
+                        <div class="theme-dot blue-red" onclick="setTheme('blue-red', event)" style="width:28px;height:28px;"></div>
+                        <div class="theme-dot black-white" onclick="setTheme('black-white', event)" style="width:28px;height:28px;"></div>
+                        <div class="theme-dot paraguay" onclick="setTheme('paraguay', event)" style="width:28px;height:28px;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-actions">
+                <button class="btn-save" onclick="closeSettings()"><i class="fas fa-check"></i> Cerrar</button>
+                <button class="btn-reset" onclick="resetSettings()"><i class="fas fa-redo"></i> Reiniciar</button>
+            </div>
+
+            <div class="version-info">
+                <i class="fas fa-code-branch"></i> Versión: <span class="version-num" id="versionDisplay">Cargando...</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="header-wrapper">
+            <h1 class="paraguay-title"><span class="paraguay-flag"></span> POWER BY TECHNO X MATRIX</h1>
+        </div>
+
+        <div class="container">
+            <div class="panel">
+                <h2><i class="fas fa-play-circle"></i> Escáner</h2>
+                
+                <div class="btn-container">
+                    <button id="btn-start" class="btn btn-start"><i class="fas fa-play"></i> INICIAR</button>
+                    <button id="btn-copy" class="btn btn-copy"><i class="fas fa-copy"></i> HITS</button>
+                    <button id="btn-stop" class="btn btn-stop"><i class="fas fa-stop"></i> PARAR</button>
+                </div>
+
+                <div id="status-bar">
+                    <span>Estado: <span id="statusText">Parado</span></span>
+                    <span>Verif.: <span id="checkedCount">0</span></span>
+                    <span>Hits: <span id="hitsCount">0</span></span>
+                    <span>CPM: <span id="cpmCount">0</span></span>
+                    <span>Combos: <span id="totalCount">0</span></span>
+                </div>
+
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span><i class="fas fa-tasks"></i> Progreso del Escaneo</span>
+                        <span class="percent" id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" onclick="switchTab('log', 'activity', event)"><i class="fas fa-list"></i> Actividad</button>
+                    <button class="tab-btn" onclick="switchTab('log', 'hits', event)"><i class="fas fa-star"></i> Hits</button>
+                </div>
+                
+                <div id="activity" class="tab-content active"></div>
+                <div id="hits" class="tab-content"></div>
+
+                <button class="btn-download" onclick="downloadList()">
+                    <i class="fas fa-download"></i> DESCARGAR LISTA
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="statusMessage" class="status"></div>
+    <audio id="bgMusic" preload="auto" crossorigin="anonymous"></audio>
+
+    <script>
+        // ==================== CONFIGURACIÓN REMOTA ====================
+        const UPDATE_URL = 'https://raw.githubusercontent.com/MasterTenho/MasterTenho.github.io/refs/heads/main/update';
+        let updateData = null;
+        let configVersion = '1.0.3';
+        let remoteNames = ['juan', 'maria', 'carlos', 'lopez', 'gomez', 'pedro', 'lucas'];
+        let remoteChannels = [];
+        let remoteStations = {
+            1: 'https://stream.revma.ihrhls.com/zc7191/hls.m3u8',
+            2: 'https://stream.revma.ihrhls.com/zc9763/hls.m3u8',
+            3: 'https://stream.revma.ihrhls.com/zc10085/hls.m3u8'
+        };
+        let videoSortAsc = true;
+
+        // ==================== CLAVE SECRETA OFUSCADA ====================
+        // Tu clave: ac2c8208e48815cab51f450bcd8e097bf6cbc50ab63d3da771f0136b72a57107
+        const _S = (() => {
+            const p = ['ac2c8208', 'e48815ca', 'b51f450b', 'cd8e097b', 'f6cbc50a', 'b63d3da7', '71f0136b', '72a57107'];
+            return p.join('');
+        })();
+
+        // ==================== VERIFICAR FIRMA ====================
+        async function verifySignature(data) {
+            if (!data.firma || data.firma.trim() === '') {
+                console.warn('⚠️ No hay firma en el JSON');
+                return false;
+            }
+
+            const mensaje = `${data.Expire}|${data.Version}`;
+
+            try {
+                const encoder = new TextEncoder();
+                const keyData = encoder.encode(_S);
+                const msgData = encoder.encode(mensaje);
+
+                const cryptoKey = await crypto.subtle.importKey(
+                    'raw', keyData, { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
+                );
+                const signatureBuffer = await crypto.subtle.sign('HMAC', cryptoKey, msgData);
+                const firmaCalculada = Array.from(new Uint8Array(signatureBuffer))
+                    .map(b => b.toString(16).padStart(2, '0')).join('');
+
+                if (firmaCalculada === data.firma.trim()) {
+                    console.log('✅ Firma válida');
+                    return true;
+                } else {
+                    console.error('❌ Firma inválida — JSON manipulado');
+                    console.log('Esperada:', firmaCalculada);
+                    console.log('Recibida:', data.firma);
+                    return false;
+                }
+            } catch (err) {
+                console.error('Error al verificar firma:', err);
+                return false;
+            }
+        }
+
+        // ==================== MOSTRAR OVERLAY DE EXPIRACIÓN ====================
+        function showExpiredOverlay(link) {
+            const overlay = document.getElementById('expireOverlay');
+            const linkEl = document.getElementById('expireLink');
+            if (link) linkEl.href = link;
+            overlay.classList.add('active');
+            try { stopMusic(); } catch(e) {}
+            isScanning = false;
+            document.querySelectorAll('button, a, input, textarea').forEach(el => {
+                el.disabled = true;
+                el.style.pointerEvents = 'none';
+                el.style.opacity = '0.4';
+            });
+            linkEl.style.pointerEvents = 'auto';
+            linkEl.style.opacity = '1';
+            linkEl.disabled = false;
+            document.body.style.overflow = 'hidden';
+        }
+
+        // ==================== CARGA REMOTA CON VERIFICACIÓN ====================
+        async function loadRemoteConfig() {
+            console.log('🔄 Cargando configuración remota...');
+            document.getElementById('loadingBanner').classList.add('active');
+
+            try {
+                const response = await fetch(UPDATE_URL, { cache: 'no-store' });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
+                const text = (await response.text()).replace(/^\uFEFF/, '').trim();
+                const data = JSON.parse(text);
+
+                // 🔐 VERIFICAR FIRMA ANTES DE CUALQUIER COSA
+                const firmaOK = await verifySignature(data);
+                if (!firmaOK) {
+                    console.error('❌ Firma inválida, bloqueando HTML');
+                    showExpiredOverlay(data.linkNuevohtml || 'https://whatsapp.com/channel/0029Vat0QigLikgCC1xikp1a');
+                    document.getElementById('loadingBanner').classList.remove('active');
+                    return;
+                }
+
+                // ✅ Firma válida, continuar
+                updateData = data;
+                configVersion = data.Version || '1.0.3';
+                document.getElementById('versionDisplay').textContent = configVersion;
+                document.getElementById('loadingBanner').classList.remove('active');
+
+                // --- EXPIRACIÓN ---
+                if (data.Expire === true) {
+                    showExpiredOverlay(data.linkNuevohtml);
+                    return;
+                }
+
+                // --- YOUTUBE ---
+                if (data.Youtubelinkchannel && data.Youtubelinkchannel.trim() !== '') {
+                    const yt = document.getElementById('youtubeFab');
+                    yt.href = data.Youtubelinkchannel.trim();
+                    yt.classList.add('active');
+                }
+
+                // --- HOSTS ---
+                if (data.Listadehost && data.Listadehost.trim() !== '') {
+                    const hostList = data.Listadehost.split('|').map(h => h.trim()).filter(h => h.length > 3);
+                    let added = 0;
+                    hostList.forEach(h => { if (!hosts.includes(h)) { hosts.push(h); added++; } });
+                    renderHosts();
+                }
+
+                // --- PROXIES ---
+                if (data.ListadeProxy && data.ListadeProxy.trim() !== '') {
+                    const proxyList = data.ListadeProxy.split('|').map(p => p.trim()).filter(p => p.length > 3);
+                    let added = 0;
+                    proxyList.forEach(p => { if (!proxies.includes(p)) { proxies.push(p); added++; } });
+                    renderProxies();
+                }
+
+                // --- NOMBRES RANDOM ---
+                if (data.listaNombreRandom && data.listaNombreRandom.trim() !== '') {
+                    remoteNames = data.listaNombreRandom.split(',').map(n => n.trim()).filter(n => n.length > 0);
+                }
+
+                // --- ESTACIONES DE MÚSICA ---
+                if (data.STATIONS && typeof data.STATIONS === 'object') {
+                    Object.keys(data.STATIONS).forEach(key => {
+                        if (data.STATIONS[key] && data.STATIONS[key].trim() !== '') {
+                            remoteStations[key] = data.STATIONS[key].trim();
+                        }
+                    });
+                }
+                buildMusicStations();
+
+                // --- CANALES DE VIDEO ---
+                loadVideoChannels(data);
+
+            } catch (err) {
+                console.error('❌ Error al cargar configuración:', err);
+                document.getElementById('loadingBanner').innerHTML =
+                    '<i class="fas fa-exclamation-triangle" style="font-size:2rem; margin-bottom:10px; color:#ff5555;"></i><br>' +
+                    'Error al cargar configuración<br>' +
+                    '<small style="font-size:0.7rem; color:#ff9999;">' + err.message + '</small>';
+                setTimeout(() => document.getElementById('loadingBanner').classList.remove('active'), 3000);
+                showStatus('Error al cargar configuración remota', 'error');
+                buildMusicStations();
+            }
+        }
+
+        // ==================== ESTACIONES DE MÚSICA DINÁMICAS ====================
+        function buildMusicStations() {
+            const container = document.getElementById('musicStationsContainer');
+            container.innerHTML = '';
+            const keys = Object.keys(remoteStations).sort((a, b) => parseInt(a) - parseInt(b));
+            if (keys.length === 0) {
+                container.innerHTML = '<div style="padding:10px;color:var(--text-muted);font-size:0.8rem;text-align:center;">No hay estaciones disponibles</div>';
+                return;
+            }
+            keys.forEach((key, idx) => {
+                const btn = document.createElement('button');
+                btn.className = 'station-btn' + (idx === 0 ? ' active' : '');
+                btn.id = 'station' + key;
+                btn.innerHTML = `<i class="fas fa-music"></i> Music ${key}`;
+                btn.onclick = () => selectStation(key);
+                container.appendChild(btn);
+            });
+            if (keys.length > 0) currentStation = keys[0];
+        }
+
+        // ==================== CANALES DE VIDEO (DINÁMICOS) ====================
+        function loadVideoChannels(data) {
+            remoteChannels = [];
+            
+            for (let i = 1; i <= 50; i++) {
+                const urlKey = 'Canal' + i;
+                const nameKey = 'Canal' + i + 'nombre';
+                if (data[urlKey] && typeof data[urlKey] === 'string' && data[urlKey].trim() !== '' && data[urlKey].includes('.m3u8')) {
+                    remoteChannels.push({
+                        num: i,
+                        url: data[urlKey].trim(),
+                        name: data[nameKey] || ('Canal ' + i)
+                    });
+                }
+            }
+
+            console.log(`📺 ${remoteChannels.length} canales de video detectados`);
+
+            const videoFab = document.getElementById('videoFab');
+            if (remoteChannels.length > 0) {
+                videoFab.classList.add('active');
+                buildVideoChannelSelector();
+            } else {
+                videoFab.classList.remove('active');
+            }
+        }
+
+        function buildVideoChannelSelector(filter = '') {
+            const selector = document.getElementById('videoChannelSelector');
+            selector.innerHTML = '';
+
+            let channels = [...remoteChannels];
+
+            if (filter.trim() !== '') {
+                const q = filter.toLowerCase();
+                channels = channels.filter(ch => ch.name.toLowerCase().includes(q));
+            }
+
+            channels.sort((a, b) => {
+                const cmp = a.name.localeCompare(b.name, 'es', { sensitivity: 'base' });
+                return videoSortAsc ? cmp : -cmp;
+            });
+
+            if (channels.length === 0) {
+                selector.innerHTML = '<div style="padding:10px;color:var(--text-muted);font-size:0.8rem;text-align:center;grid-column:1/-1;">No se encontraron canales</div>';
+                return;
+            }
+
+            channels.forEach((ch) => {
+                const btn = document.createElement('button');
+                btn.className = 'vc-btn';
+                btn.innerHTML = `<i class="fas fa-tv"></i> ${ch.name}`;
+                btn.onclick = () => switchVideoChannel(ch, btn);
+                if (currentVideoChannel && currentVideoChannel.num === ch.num) {
+                    btn.classList.add('active');
+                }
+                selector.appendChild(btn);
+            });
+        }
+
+        let currentVideoChannel = null;
+
+        function filterVideoChannels(query) {
+            buildVideoChannelSelector(query);
+        }
+
+        function toggleVideoSort() {
+            videoSortAsc = !videoSortAsc;
+            const icon = document.getElementById('videoSortIcon');
+            icon.className = videoSortAsc ? 'fas fa-sort-alpha-down' : 'fas fa-sort-alpha-up';
+            const searchInput = document.getElementById('videoSearchInput');
+            buildVideoChannelSelector(searchInput.value);
+            showStatus(videoSortAsc ? 'Ordenado A-Z' : 'Ordenado Z-A', 'info');
+        }
+
+        let videoHls = null;
+
+        function loadVideoChannel(channel) {
+            const video = document.getElementById('videoPlayer');
+            const noChannels = document.getElementById('videoNoChannels');
+            if (!channel) {
+                video.style.display = 'none';
+                noChannels.style.display = 'block';
+                return;
+            }
+            video.style.display = 'block';
+            noChannels.style.display = 'none';
+            if (videoHls) { videoHls.destroy(); videoHls = null; }
+            console.log('📺 Cargando canal:', channel.name, '->', channel.url);
+            currentVideoChannel = channel;
+            if (Hls.isSupported()) {
+                videoHls = new Hls();
+                videoHls.loadSource(channel.url);
+                videoHls.attachMedia(video);
+                videoHls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play().catch(err => console.log('Autoplay bloqueado:', err));
+                });
+                videoHls.on(Hls.Events.ERROR, function(event, data) {
+                    console.warn('Error HLS video:', data);
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = channel.url;
+                video.play().catch(err => console.log('Autoplay bloqueado:', err));
+            }
+        }
+
+        function switchVideoChannel(channel, btn) {
+            document.querySelectorAll('.vc-btn').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            loadVideoChannel(channel);
+        }
+
+        function openVideoModal() {
+            if (remoteChannels.length === 0) return;
+            const overlay = document.getElementById('videoModalOverlay');
+            overlay.classList.add('open');
+            document.getElementById('videoSearchInput').value = '';
+            buildVideoChannelSelector();
+            if (musicStarted && !musicPaused) {
+                bgMusic.pause();
+                musicPaused = true;
+                musicIndicator.classList.remove('active');
+                stopSpectrum();
+                updateMusicPauseBtn();
+            }
+            if (!currentVideoChannel && remoteChannels.length > 0) {
+                loadVideoChannel(remoteChannels[0]);
+            }
+        }
+
+        function closeVideoModal() {
+            const overlay = document.getElementById('videoModalOverlay');
+            overlay.classList.remove('open');
+            const video = document.getElementById('videoPlayer');
+            video.pause();
+        }
+
+        // ==================== MÚSICA ====================
+        const bgMusic = document.getElementById('bgMusic');
+        const musicIndicator = document.getElementById('musicIndicator');
+        const musicLabel = document.getElementById('musicLabel');
+        const musicPauseBtn = document.getElementById('musicPauseBtn');
+
+        let hls = null;
+        let musicStarted = false;
+        let musicEnabled = true;
+        let musicPaused = false;
+        let currentStation = 1;
+        let audioContext = null;
+        let analyser = null;
+        let sourceNode = null;
+        let spectrumAnimation = null;
+
+        function initSpectrum() {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    analyser = audioContext.createAnalyser();
+                    analyser.fftSize = 64;
+                    sourceNode = audioContext.createMediaElementSource(bgMusic);
+                    sourceNode.connect(analyser);
+                    analyser.connect(audioContext.destination);
+                }
+                if (audioContext.state === 'suspended') audioContext.resume();
+            } catch (e) { console.log('Error espectro:', e); }
+        }
+
+        function drawSpectrum() {
+            if (!analyser) return;
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+            const fixedBars = document.querySelectorAll('#audioSpectrum .bar');
+            fixedBars.forEach((bar, i) => {
+                const value = dataArray[i] || 0;
+                bar.style.height = Math.max(3, (value / 255) * 80) + 'px';
+            });
+            spectrumAnimation = requestAnimationFrame(drawSpectrum);
+        }
+
+        function createSpectrumBars() {
+            const container = document.getElementById('audioSpectrum');
+            container.innerHTML = '';
+            for (let i = 0; i < 64; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                container.appendChild(bar);
+            }
+        }
+
+        function startSpectrum() {
+            initSpectrum();
+            document.getElementById('audioSpectrum').classList.add('active');
+            if (spectrumAnimation) cancelAnimationFrame(spectrumAnimation);
+            drawSpectrum();
+        }
+
+        function stopSpectrum() {
+            if (spectrumAnimation) { cancelAnimationFrame(spectrumAnimation); spectrumAnimation = null; }
+            document.getElementById('audioSpectrum').classList.remove('active');
+            document.querySelectorAll('#audioSpectrum .bar').forEach(bar => bar.style.height = '2px');
+        }
+
+        function selectStation(num) {
+            currentStation = num;
+            document.querySelectorAll('.station-btn').forEach((btn) => {
+                btn.classList.toggle('active', btn.id === 'station' + num);
+            });
+            musicLabel.textContent = `MÚSICA ${num} ON`;
+            if (musicStarted) { stopMusic(); startMusic(); }
+            showStatus(`Estación ${num} seleccionada!`, 'success');
+        }
+
+        function startMusic() {
+            if (!musicEnabled || musicStarted) return;
+            const url = remoteStations[currentStation];
+            if (!url) { console.warn('No hay URL para estación', currentStation); return; }
+            musicPaused = false;
+            updateMusicPauseBtn();
+            if (Hls.isSupported()) {
+                hls = new Hls();
+                hls.loadSource(url);
+                hls.attachMedia(bgMusic);
+                hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    bgMusic.volume = getVolume();
+                    bgMusic.play().then(() => {
+                        musicStarted = true;
+                        musicIndicator.classList.add('active');
+                        startSpectrum();
+                    }).catch(err => console.log('Autoplay bloqueado:', err));
+                });
+                hls.on(Hls.Events.ERROR, function (event, data) { console.warn('Error HLS:', data); });
+            } else if (bgMusic.canPlayType('application/vnd.apple.mpegurl')) {
+                bgMusic.src = url;
+                bgMusic.volume = getVolume();
+                bgMusic.play().then(() => {
+                    musicStarted = true;
+                    musicIndicator.classList.add('active');
+                    startSpectrum();
+                }).catch(err => console.log('Autoplay bloqueado:', err));
+            }
+        }
+
+        function stopMusic() {
+            if (hls) { hls.destroy(); hls = null; }
+            bgMusic.pause();
+            bgMusic.removeAttribute('src');
+            bgMusic.load();
+            musicStarted = false;
+            musicPaused = false;
+            musicIndicator.classList.remove('active');
+            stopSpectrum();
+            updateMusicPauseBtn();
+        }
+
+        function toggleMusicPlayPause() {
+            if (!musicStarted && !musicPaused) {
+                startMusic();
+                return;
+            }
+            if (musicPaused) {
+                bgMusic.play().then(() => {
+                    musicPaused = false;
+                    musicIndicator.classList.add('active');
+                    startSpectrum();
+                    updateMusicPauseBtn();
+                    showStatus('Música reanudada', 'success');
+                }).catch(err => console.log('Error al reanudar:', err));
+            } else {
+                bgMusic.pause();
+                musicPaused = true;
+                musicIndicator.classList.remove('active');
+                stopSpectrum();
+                updateMusicPauseBtn();
+                showStatus('Música pausada', 'info');
+            }
+        }
+
+        function updateMusicPauseBtn() {
+            if (!musicPauseBtn) return;
+            if (musicPaused) {
+                musicPauseBtn.innerHTML = '<i class="fas fa-play"></i> REANUDAR MÚSICA';
+                musicPauseBtn.classList.add('paused');
+            } else {
+                musicPauseBtn.innerHTML = '<i class="fas fa-pause"></i> PAUSAR MÚSICA';
+                musicPauseBtn.classList.remove('paused');
+            }
+        }
+
+        function getVolume() { const s = document.getElementById('volumeSlider'); return s ? s.value / 100 : 0.35; }
+        function updateVolume(val) { bgMusic.volume = val / 100; }
+        function toggleMusicSetting() {
+            musicEnabled = !musicEnabled;
+            const btn = document.getElementById('musicToggle');
+            btn.textContent = musicEnabled ? 'ON' : 'OFF';
+            btn.classList.toggle('on', musicEnabled);
+            if (!musicEnabled) stopMusic();
+        }
+
+        // ==================== PANEL DE AJUSTES ====================
+        function openSettings() {
+            document.getElementById('settingsOverlay').classList.add('open');
+            renderProxies();
+            renderHosts();
+            document.getElementById('themeSwitcher').classList.add('visible');
+        }
+        function closeSettings() {
+            document.getElementById('settingsOverlay').classList.remove('open');
+            document.getElementById('themeSwitcher').classList.remove('visible');
+        }
+        function resetSettings() {
+            if (confirm('¿Reiniciar configuración y limpiar listas?')) {
+                proxies = []; hosts = []; comboData = []; comboCount = 0;
+                renderProxies(); renderHosts(); renderCombo();
+                updateComboInfo(); updateTotals(); updateProgress(0);
+                showStatus('¡Configuración reiniciada!', 'success');
+            }
+        }
+        document.getElementById('settingsOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeSettings();
+        });
+
+        function setTheme(theme, event) {
+            document.body.className = 'theme-' + theme;
+            document.querySelectorAll('.theme-dot').forEach(dot => dot.classList.remove('active'));
+            document.querySelectorAll(`.theme-dot.${theme}`).forEach(dot => dot.classList.add('active'));
+            matrixColor = theme;
+            showStatus(`¡Tema ${theme} activado!`, 'success');
+        }
+
+        // ==================== FONDO MATRIX ====================
+        let matrixColor = 'green';
+        const matrixColors = { green: [0, 255, 102], red: [255, 59, 59], blue: [0, 170, 255], purple: [187, 102, 255], 'blue-red': [255, 59, 59], 'black-white': [255, 255, 255], paraguay: [255, 255, 255] };
+
+        (function() {
+            const canvas = document.getElementById('matrix-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height, columns;
+            const isMobile = window.innerWidth < 768;
+            const fontSize = isMobile ? 12 : 16;
+            let drops = [];
+            const chars = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789ABCDEF@#$%&*'.split('');
+            
+            function resize() {
+                width = canvas.width = window.innerWidth;
+                height = canvas.height = window.innerHeight;
+                columns = Math.floor(width / fontSize);
+                drops = [];
+                for (let i = 0; i < columns; i++) drops[i] = Math.floor(Math.random() * -100);
+            }
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 5, 0, 0.06)';
+                ctx.fillRect(0, 0, width, height);
+                ctx.font = fontSize + 'px "Share Tech Mono", monospace';
+                const rgb = matrixColors[matrixColor] || matrixColors.green;
+                for (let i = 0; i < drops.length; i++) {
+                    const char = chars[Math.floor(Math.random() * chars.length)];
+                    const x = i * fontSize;
+                    const y = drops[i] * fontSize;
+                    const brightness = Math.random() * 0.5 + 0.5;
+                    ctx.fillStyle = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${brightness})`;
+                    ctx.fillText(char, x, y);
+                    if (y > height && Math.random() > 0.975) drops[i] = 0;
+                    drops[i]++;
+                }
+            }
+            window.addEventListener('resize', resize);
+            resize();
+            setInterval(draw, isMobile ? 60 : 45);
+        })();
+
+        // ==================== DATOS ====================
+        let proxies = [];
+        let hosts = [];
+        let comboData = [];
+        let comboCount = 0;
+        let isScanning = false;
+        let checkedCount = 0;
+        let hitsCount = 0;
+        let totalToScan = 100;
+        let startTime = 0;
+        let cpmInterval;
+        let proxyTestStatus = {};
+        let hostTestStatus = {};
+        let comboMode = 'random';
+        let comboGenMode = 'letter';
+        let comboQty = 10;
+
+        // ==================== INICIALIZACIÓN ====================
+        document.addEventListener('DOMContentLoaded', function() {
+            renderProxies();
+            renderHosts();
+            renderCombo();
+            setupEventListeners();
+            updateComboInfo();
+            updateTotals();
+            updateProgress(0);
+            createSpectrumBars();
+            loadRemoteConfig();
+        });
+
+        document.addEventListener('click', function initMusicOnFirstClick() {
+            if (!musicStarted && musicEnabled) startMusic();
+            document.removeEventListener('click', initMusicOnFirstClick);
+        }, { once: true });
+
+        function updateTotals() {
+            document.getElementById('proxyTotalSettings').textContent = proxies.length;
+            document.getElementById('hostTotalSettings').textContent = hosts.length;
+        }
+
+        // ==================== MODO COMBO ====================
+        function setComboMode(mode) {
+            comboMode = mode;
+            document.getElementById('comboModeRandom').classList.toggle('active', mode === 'random');
+            document.getElementById('comboModeFile').classList.toggle('active', mode === 'file');
+            document.getElementById('comboRandomPanel').style.display = mode === 'random' ? 'block' : 'none';
+            document.getElementById('comboFilePanel').style.display = mode === 'file' ? 'block' : 'none';
+            showStatus(mode === 'random' ? '¡Modo Random activado!' : '¡Modo Archivo activado!', 'info');
+        }
+        function setComboGenMode(mode) {
+            comboGenMode = mode;
+            document.getElementById('genName').classList.toggle('active', mode === 'name');
+            document.getElementById('genNumber').classList.toggle('active', mode === 'number');
+            document.getElementById('genLetter').classList.toggle('active', mode === 'letter');
+            document.getElementById('genLetterNro').classList.toggle('active', mode === 'letternro');
+            const names = { name: 'Nombre', number: 'Número', letter: 'Letra', letternro: 'LetraNro' };
+            showStatus(`Tipo de generación: ${names[mode]}`, 'success');
+        }
+        function setComboQty(qty) {
+            comboQty = qty;
+            document.getElementById('comboQty').value = qty;
+            showStatus(`Cantidad: ${qty}`, 'success');
+        }
+
+        // ==================== DESCARGAR ====================
+        function downloadList() {
+            const content = document.getElementById('activity').textContent + '\n\n=== HITS ===\n\n' + document.getElementById('hits').textContent;
+            if (!content.trim()) { showStatus('No hay datos para descargar. Inicia el escaneo primero.', 'error'); return; }
+            const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `techno_scan_${new Date().toISOString().slice(0,19).replace(/[:T]/g, '-')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showStatus('¡Lista descargada con éxito!', 'success');
+        }
+
+        // ==================== SUBIR COMBO ====================
+        function handleComboUpload() {
+            const file = document.getElementById('combo').files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const newCombos = e.target.result.split('\n').map(l => l.trim()).filter(l => l.includes(':') && l.length > 3);
+                let added = 0;
+                newCombos.forEach(c => { if (!comboData.includes(c)) { comboData.push(c); added++; } });
+                comboCount = comboData.length;
+                updateComboInfo();
+                renderCombo();
+                showStatus(`Combo: +${added} entradas (total ${comboCount}).`, 'success');
+            };
+            reader.readAsText(file);
+        }
+
+        function updateComboInfo() {
+            const info = document.getElementById('comboInfo');
+            if (info) info.textContent = comboCount > 0 ? `${comboCount} combos cargados` : 'Ningún archivo seleccionado';
+            document.getElementById('totalCount').textContent = comboCount || '∞';
+        }
+
+        function renderCombo(filter = '') {
+            const container = document.getElementById('comboContainer');
+            if (!container) return;
+            const filtered = comboData.filter(c => c.toLowerCase().includes(filter.toLowerCase()));
+            container.innerHTML = '';
+            if (filtered.length === 0) {
+                container.innerHTML = '<div style="padding:10px;color:var(--text-muted);font-size:0.8rem;text-align:center;">Ningún combo cargado</div>';
+            } else {
+                filtered.forEach(combo => {
+                    const div = document.createElement('div');
+                    div.className = 'combo-item';
+                    const span = document.createElement('span');
+                    span.textContent = combo;
+                    const btn = document.createElement('button');
+                    btn.className = 'remove-btn';
+                    btn.innerHTML = '×';
+                    btn.onclick = e => { e.stopPropagation(); removeCombo(combo); };
+                    div.appendChild(span); div.appendChild(btn);
+                    container.appendChild(div);
+                });
+            }
+        }
+        function removeCombo(combo) {
+            const idx = comboData.indexOf(combo);
+            if (idx > -1) { comboData.splice(idx, 1); comboCount = comboData.length; updateComboInfo(); renderCombo(); showStatus('Combo eliminado.', 'info'); }
+        }
+
+        // ==================== RENDERIZACIÓN ====================
+        function renderProxies(filter = '') {
+            const container = document.getElementById('proxyContainer');
+            if (!container) return;
+            const filtered = proxies.filter(p => p.toLowerCase().includes(filter.toLowerCase()));
+            container.innerHTML = '';
+            filtered.forEach(proxy => {
+                const div = document.createElement('div');
+                div.className = 'proxy-item';
+                const status = proxyTestStatus[proxy];
+                if (status) {
+                    const dot = document.createElement('span');
+                    dot.className = 'test-status ' + status;
+                    div.appendChild(dot);
+                }
+                const span = document.createElement('span');
+                span.textContent = proxy;
+                span.style.flex = '1';
+                const btn = document.createElement('button');
+                btn.className = 'remove-btn';
+                btn.innerHTML = '×';
+                btn.onclick = e => { e.stopPropagation(); removeProxy(proxy); };
+                div.appendChild(span); div.appendChild(btn);
+                container.appendChild(div);
+            });
+            updateTotals();
+        }
+        function removeProxy(proxy) {
+            const idx = proxies.indexOf(proxy);
+            if (idx > -1) { proxies.splice(idx, 1); delete proxyTestStatus[proxy]; renderProxies(); showStatus('Proxy eliminado.', 'info'); }
+        }
+
+        function renderHosts(filter = '') {
+            const container = document.getElementById('hostContainer');
+            if (!container) return;
+            const filtered = hosts.filter(h => h.toLowerCase().includes(filter.toLowerCase()));
+            container.innerHTML = '';
+            filtered.forEach(host => {
+                const div = document.createElement('div');
+                div.className = 'host-item';
+                const status = hostTestStatus[host];
+                if (status) {
+                    const dot = document.createElement('span');
+                    dot.className = 'test-status ' + status;
+                    div.appendChild(dot);
+                }
+                const span = document.createElement('span');
+                span.textContent = host;
+                span.style.flex = '1';
+                const btn = document.createElement('button');
+                btn.className = 'remove-btn';
+                btn.innerHTML = '×';
+                btn.onclick = e => { e.stopPropagation(); removeHost(host); };
+                div.appendChild(span); div.appendChild(btn);
+                container.appendChild(div);
+            });
+            updateTotals();
+        }
+        function removeHost(host) {
+            const idx = hosts.indexOf(host);
+            if (idx > -1) { hosts.splice(idx, 1); delete hostTestStatus[host]; renderHosts(); showStatus('Host eliminado.', 'info'); }
+        }
+
+        // ==================== PROBAR ====================
+        function testProxies() {
+            if (proxies.length === 0) { showStatus('Ningún proxy para probar.', 'error'); return; }
+            showStatus('Probando proxies...', 'info');
+            proxies.forEach(p => proxyTestStatus[p] = 'testing');
+            renderProxies();
+            setTimeout(() => {
+                let online = 0;
+                proxies.forEach(p => {
+                    const isOnline = Math.random() < 0.8;
+                    proxyTestStatus[p] = isOnline ? 'online' : 'offline';
+                    if (isOnline) online++;
+                });
+                renderProxies();
+                showStatus(`¡${online}/${proxies.length} proxies online!`, 'success');
+            }, 2000);
+        }
+        function testHosts() {
+            if (hosts.length === 0) { showStatus('Ningún host para probar.', 'error'); return; }
+            showStatus('Probando hosts...', 'info');
+            hosts.forEach(h => hostTestStatus[h] = 'testing');
+            renderHosts();
+            setTimeout(() => {
+                let online = 0;
+                hosts.forEach(h => {
+                    const isOnline = Math.random() < 0.8;
+                    hostTestStatus[h] = isOnline ? 'online' : 'offline';
+                    if (isOnline) online++;
+                });
+                renderHosts();
+                showStatus(`¡${online}/${hosts.length} hosts online!`, 'success');
+            }, 2000);
+        }
+        function removeOfflineProxies() {
+            const offline = proxies.filter(p => proxyTestStatus[p] === 'offline');
+            if (offline.length === 0) { showStatus('Ningún proxy offline. Prueba primero.', 'info'); return; }
+            if (confirm(`¿Eliminar ${offline.length} proxies offline?`)) {
+                proxies = proxies.filter(p => proxyTestStatus[p] !== 'offline');
+                offline.forEach(p => delete proxyTestStatus[p]);
+                renderProxies();
+                showStatus(`¡${offline.length} proxies offline eliminados!`, 'success');
+            }
+        }
+        function removeOfflineHosts() {
+            const offline = hosts.filter(h => hostTestStatus[h] === 'offline');
+            if (offline.length === 0) { showStatus('Ningún host offline. Prueba primero.', 'info'); return; }
+            if (confirm(`¿Eliminar ${offline.length} hosts offline?`)) {
+                hosts = hosts.filter(h => hostTestStatus[h] !== 'offline');
+                offline.forEach(h => delete hostTestStatus[h]);
+                renderHosts();
+                showStatus(`¡${offline.length} hosts offline eliminados!`, 'success');
+            }
+        }
+
+        // ==================== IMPORTAR ====================
+        function importProxiesFromText() {
+            const textarea = document.getElementById('proxyImportArea');
+            const text = textarea.value.trim();
+            if (!text) { showStatus('Pega una lista primero.', 'error'); return; }
+            const lines = text.split(/[\n|]/).map(l => l.trim()).filter(l => l.includes(':') && l.length > 3);
+            let added = 0;
+            lines.forEach(p => { if (!proxies.includes(p)) { proxies.push(p); added++; } });
+            if (added > 0) { textarea.value = ''; renderProxies(); showStatus(`¡${added} proxies importados!`, 'success'); }
+            else showStatus('Ningún proxy nuevo.', 'info');
+        }
+        function importProxiesFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const lines = e.target.result.split(/[\n|]/).map(l => l.trim()).filter(l => l.includes(':') && l.length > 3);
+                let added = 0;
+                lines.forEach(p => { if (!proxies.includes(p)) { proxies.push(p); added++; } });
+                if (added > 0) { renderProxies(); showStatus(`¡${added} proxies importados!`, 'success'); }
+                else showStatus('Ningún proxy nuevo.', 'info');
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+        function importHostsFromText() {
+            const textarea = document.getElementById('hostImportArea');
+            const text = textarea.value.trim();
+            if (!text) { showStatus('Pega una lista primero.', 'error'); return; }
+            const lines = text.split(/[\n|]/).map(l => l.trim()).filter(l => l.includes(':') && l.length > 3);
+            let added = 0;
+            lines.forEach(h => { if (!hosts.includes(h)) { hosts.push(h); added++; } });
+            if (added > 0) { textarea.value = ''; renderHosts(); showStatus(`¡${added} hosts importados!`, 'success'); }
+            else showStatus('Ningún host nuevo.', 'info');
+        }
+        function importHostsFromFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const lines = e.target.result.split(/[\n|]/).map(l => l.trim()).filter(l => l.includes(':') && l.length > 3);
+                let added = 0;
+                lines.forEach(h => { if (!hosts.includes(h)) { hosts.push(h); added++; } });
+                if (added > 0) { renderHosts(); showStatus(`¡${added} hosts importados!`, 'success'); }
+                else showStatus('Ningún host nuevo.', 'info');
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // ==================== AGREGAR ====================
+        function addProxy() {
+            const input = document.getElementById('newProxyInput');
+            const val = input.value.trim();
+            if (!val || !val.includes(':')) { showStatus('Usa IP:PUERTO', 'error'); return; }
+            if (proxies.includes(val)) { showStatus('Proxy ya existe.', 'error'); return; }
+            proxies.push(val);
+            input.value = '';
+            renderProxies();
+            showStatus('¡Proxy agregado!', 'success');
+        }
+        function addHost() {
+            const input = document.getElementById('newHostInput');
+            const val = input.value.trim();
+            if (!val || !val.includes(':')) { showStatus('Usa dominio:puerto', 'error'); return; }
+            if (hosts.includes(val)) { showStatus('Host ya existe.', 'error'); return; }
+            hosts.push(val);
+            input.value = '';
+            renderHosts();
+            showStatus('¡Host agregado!', 'success');
+        }
+
+        // ==================== GENERADORES ====================
+        function randomIP() {
+            return Math.floor(Math.random() * 255) + 1 + '.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255) + '.' + Math.floor(Math.random() * 255);
+        }
+        function randomPort() {
+            const ports = [80, 8080, 3128, 8000, 8888, 443, 1080, 8001, 8081, 9090];
+            return ports[Math.floor(Math.random() * ports.length)];
+        }
+        function randomDomain() {
+            const prefixes = ['cdn', 'stream', 'tv', 'iptv', 'media', 'video', 'play', 'live', 'top', 'max'];
+            const suffixes = ['.top', '.com', '.net', '.br', '.tv', '.xyz', '.info', '.online'];
+            return prefixes[Math.floor(Math.random() * prefixes.length)] + Math.floor(Math.random() * 99) + suffixes[Math.floor(Math.random() * suffixes.length)];
+        }
+        function randomUser() {
+            if (comboGenMode === 'name') return remoteNames[Math.floor(Math.random() * remoteNames.length)] + Math.floor(Math.random() * 99);
+            if (comboGenMode === 'number') { let u = ''; for (let i = 0; i < 8; i++) u += Math.floor(Math.random() * 10); return u; }
+            if (comboGenMode === 'letter') { const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'; let u = ''; for (let i = 0; i < 8; i++) u += c[Math.floor(Math.random() * c.length)]; return u; }
+            if (comboGenMode === 'letternro') { const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'; let u = ''; for (let i = 0; i < 4; i++) u += c[Math.floor(Math.random() * c.length)]; for (let i = 0; i < 4; i++) u += Math.floor(Math.random() * 10); return u; }
+            return 'user' + Math.floor(Math.random() * 9999);
+        }
+        function randomPass() {
+            if (comboGenMode === 'name') return remoteNames[Math.floor(Math.random() * remoteNames.length)] + Math.floor(Math.random() * 999);
+            if (comboGenMode === 'number') { let p = ''; for (let i = 0; i < 10; i++) p += Math.floor(Math.random() * 10); return p; }
+            if (comboGenMode === 'letter') { const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'; let p = ''; for (let i = 0; i < 10; i++) p += c[Math.floor(Math.random() * c.length)]; return p; }
+            if (comboGenMode === 'letternro') { const c = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'; let p = ''; for (let i = 0; i < 5; i++) p += c[Math.floor(Math.random() * c.length)]; for (let i = 0; i < 5; i++) p += Math.floor(Math.random() * 10); return p; }
+            return 'pass' + Math.floor(Math.random() * 9999);
+        }
+        function addRandomProxies(qty) {
+            let added = 0;
+            for (let i = 0; i < qty; i++) {
+                const p = randomIP() + ':' + randomPort();
+                if (!proxies.includes(p)) { proxies.push(p); added++; }
+            }
+            renderProxies();
+            showStatus(`¡${added} proxies agregados!`, 'success');
+        }
+        function addRandomHosts(qty) {
+            let added = 0;
+            for (let i = 0; i < qty; i++) {
+                const h = randomDomain() + ':' + randomPort();
+                if (!hosts.includes(h)) { hosts.push(h); added++; }
+            }
+            renderHosts();
+            showStatus(`¡${added} hosts agregados!`, 'success');
+        }
+
+        // ==================== EVENTOS ====================
+        function setupEventListeners() {
+            document.getElementById('btn-start').addEventListener('click', toggleScan);
+            document.getElementById('btn-copy').addEventListener('click', copyHits);
+            document.getElementById('btn-stop').addEventListener('click', stopScan);
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Escape') {
+                    closeSettings();
+                    closeVideoModal();
+                }
+            });
+        }
+
+        function switchTab(type, tabName, event) {
+            if (type === 'log') {
+                document.querySelectorAll('#activity, #hits').forEach(t => t.classList.remove('active'));
+                document.getElementById(tabName).classList.add('active');
+                document.querySelectorAll('.panel .tab-btn').forEach(b => b.classList.remove('active'));
+                if (event && event.currentTarget) event.currentTarget.classList.add('active');
+            }
+        }
+
+        function updateProgress(percent) {
+            const p = Math.max(0, Math.min(100, percent));
+            document.getElementById('progressFill').style.width = p + '%';
+            document.getElementById('progressPercent').textContent = Math.round(p) + '%';
+        }
+
+        // ==================== ESCANEO ====================
+        function toggleScan() {
+            if (isScanning) stopScan();
+            else startScan();
+        }
+        function startScan() {
+            if (comboMode === 'file' && comboCount === 0) { showStatus('¡Carga un archivo combo primero!', 'error'); return; }
+            if (hosts.length === 0) { showStatus('¡Agrega al menos un host!', 'error'); return; }
+            startMusic();
+            isScanning = true;
+            checkedCount = 0;
+            hitsCount = 0;
+            startTime = Date.now();
+            if (comboMode === 'random') { totalToScan = comboQty; document.getElementById('totalCount').textContent = comboQty; }
+            else { totalToScan = comboCount; document.getElementById('totalCount').textContent = comboCount; }
+            document.getElementById('statusText').textContent = 'ON';
+            document.getElementById('checkedCount').textContent = '0';
+            document.getElementById('hitsCount').textContent = '0';
+            document.getElementById('btn-start').classList.add('running');
+            updateProgress(0);
+            cpmInterval = setInterval(updateCPM, 1000);
+            simulateScanProgress();
+            log('activity', `㊙️ INICIANDO ESCANEO (${comboMode === 'random' ? 'RANDOM' : 'ARCHIVO'}) + MÚSICA...`, 'info');
+        }
+        function stopScan() {
+            if (!isScanning) { showStatus('El escaneo ya está parado.', 'info'); return; }
+            isScanning = false;
+            clearInterval(cpmInterval);
+            stopMusic();
+            document.getElementById('statusText').textContent = 'OFF';
+            document.getElementById('btn-start').classList.remove('running');
+            log('activity', '⚡ ESCANEO INTERRUMPIDO.', 'info');
+        }
+        function updateCPM() {
+            const elapsedMinutes = (Date.now() - startTime) / 1000 / 60;
+            const cpm = elapsedMinutes > 0 ? Math.round(checkedCount / elapsedMinutes) : 0;
+            document.getElementById('cpmCount').textContent = cpm;
+        }
+
+        function gerarHitInfo(user, pass, host) {
+            const totalCanais = Math.floor(Math.random() * 1500) + 500;
+            const totalSeries = Math.floor(Math.random() * 800) + 200;
+            const totalPeliculas = Math.floor(Math.random() * 1200) + 300;
+            const totalAdulto = Math.floor(Math.random() * 400) + 50;
+            const mesesAtras = Math.floor(Math.random() * 24) + 1;
+            const dataCriacao = new Date(); dataCriacao.setMonth(dataCriacao.getMonth() - mesesAtras);
+            const dataCriacaoStr = dataCriacao.toLocaleDateString('es-PY');
+            const mesesFuturo = Math.floor(Math.random() * 12) + 1;
+            const dataExpiracao = new Date(); dataExpiracao.setMonth(dataExpiracao.getMonth() + mesesFuturo);
+            const dataExpiracaoStr = dataExpiracao.toLocaleDateString('es-PY');
+            const concesiones = Math.floor(Math.random() * 5) + 1;
+            const status = Math.random() > 0.15 ? 'Activo' : 'Inactivo';
+            return `POWER BY TECHNO X MATRIX
+═══════════════════════════════
+
+👤 USUARIO: ${user}
+🔑 CONTRASEÑA: ${pass}
+🌐 SERVIDOR: ${host}
+
+📅 CREACIÓN: ${dataCriacaoStr}
+⏳ EXPIRA: ${dataExpiracaoStr}
+📊 CONCESIONES: ${concesiones}
+✅ ESTADO: ${status}
+
+═══════════════════════════════
+📊 CONTENIDO DISPONIBLE:
+   • CANALES: ${totalCanais}
+   • SERIES: ${totalSeries}
+   • PELÍCULAS: ${totalPeliculas}
+   • ADULTO: ${totalAdulto}
+═══════════════════════════════
+M3U:
+http://${host}/get.php?username=${user}&password=${pass}&type=m3u
+
+📱 CANAL WHATSAPP:
+https://whatsapp.com/channel/0029Vat0QigLikgCC1xikp1a`.trim();
+        }
+
+        function simulateScanProgress() {
+            if (!isScanning) return;
+            setTimeout(() => {
+                if (!isScanning) return;
+                checkedCount++;
+                document.getElementById('checkedCount').textContent = checkedCount;
+                updateProgress((checkedCount / totalToScan) * 100);
+                let user, pass;
+                if (comboMode === 'random') { user = randomUser(); pass = randomPass(); }
+                else { if (comboData.length === 0) return; [user, pass] = comboData[Math.floor(Math.random() * comboData.length)].split(':'); }
+                const randomHost = hosts[Math.floor(Math.random() * hosts.length)];
+                if (Math.random() < 0.2) {
+                    hitsCount++;
+                    document.getElementById('hitsCount').textContent = hitsCount;
+                    log('activity', `[HIT] [${randomHost}] ${user}:${pass}`, 'hit');
+                    log('hits', gerarHitInfo(user, pass, randomHost), 'hit');
+                } else {
+                    log('activity', `[FALLO] [${randomHost}] ${user}:${pass}`, 'fail');
+                }
+                if (checkedCount < totalToScan) simulateScanProgress();
+                else { updateProgress(100); stopScan(); log('activity', 'Verificado por tecno.', 'hit'); }
+            }, 100);
+        }
+
+        function copyHits() {
+            const content = document.getElementById('hits').textContent;
+            if (content.trim() === '') { showStatus('Ningún hit para copiar.', 'error'); return; }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(content).then(() => showStatus('¡Hits copiados!', 'success')).catch(() => legacyCopy(content));
+            } else legacyCopy(content);
+        }
+        function legacyCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); showStatus('¡Hits copiados!', 'success'); }
+            catch (e) { showStatus('Fallo al copiar.', 'error'); }
+            document.body.removeChild(ta);
+        }
+        function log(pane, message, type) {
+            const el = document.getElementById(pane);
+            const div = document.createElement('div');
+            div.className = 'log-' + type;
+            div.textContent = message;
+            el.appendChild(div);
+            el.scrollTop = el.scrollHeight;
+        }
+        function showStatus(message, type) {
+            const el = document.getElementById('statusMessage');
+            el.textContent = message;
+            el.className = 'status ' + type;
+            setTimeout(() => el.className = 'status', 3000);
+        }
+    </script>
+</body>
+</html>
