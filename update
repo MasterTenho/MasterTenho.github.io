@@ -1,8 +1,9 @@
 {
   "Version": "1.0.2",
+  "Expire": false,
+  "firma": "ba9484df3a386f1b00adb25ad4017ad11ca3a7d66171cf680d13aa900d243391",
   "Youtubelinkchannel": "",
   "linkNuevohtml": "https://whatsapp.com/channel/0029Vat0QigLikgCC1xikp1a",
-  "Expire": false,
   "STATIONS": {
     "1": "https://stream.revma.ihrhls.com/zc7191/hls.m3u8",
     "2": "https://stream.revma.ihrhls.com/zc9763/hls.m3u8",
