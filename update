@@ -1,1 +1,15 @@
-{"linkNuevohtml":"https://whatsapp.com/channel/0029Vat0QigLikgCC1xikp1a","Expire":false}
+{
+  "Version": "1.0.1",
+  "Youtubelinkchannel": "",
+  "linkNuevohtml": "https://whatsapp.com/channel/0029Vat0QigLikgCC1xikp1a",
+  "Expire": false,
+  "Canal1": "https://cdn-apse1-prod.tsv2.amagi.tv/linear/amg00718-outdoorchannela-outdoortvnz-samsungnz/playlist.m3u8",
+  "Canal1nombre": "Outdoor Channel",
+  "Canal2": "https://jmp2.uk/plu-64ecc21744fe100009d274eb.m3u8",
+  "Canal2nombre": "Halloween",
+  "Canal3": "",
+  "Canal3nombre": "",
+  "Listadehost": "http://123-hp-com-setup-print-scan.com:80|http://3237bayviewvip.ca:80|http://asgroup.net.au:80|http://c8businessgroup.info:80|http://criptomig.com:80|http://cuiasbaroni.com.br:80|http://dharmaworldwide.com:80|http://dimc.rest:80|http://east2.global:80|http://encuentrotuspartidas.com.ar:80|http://esmerollers.com:80|http://exectreatmentcare.info:80|http://lifetechvn.net:80|http://misidezero.net:80|http://misr365.net:80|http://momsmeet.com:80|http://mrdakgalbi.com.my:80|http://nomadzo.click:80|http://cgratos.com:8789|http://dr-iptv.com:8789|http://elaf.xyz:8789|http://falcon-iptv-4k.com:8789|http://falcon-iptv-4k.net:8789|http://iptvpro.premium-itv.com:8789|http://iptvpro2.com:8789|http://kora-tv.net:8789|http://ottpro2.com:8789|http://premium.backup.iptvpro2.com:8789|http://siptv-pro2.com:8789|http://tkiptv.com:8789|http://www.kora-tv.net:8789",
+  "ListadeProxy": "http://103.172.42.235:8080|http://8.209.255.13:3128|http://102.244.78.61:8087|http://160.248.7.177:80|http://163.172.53.142:80|http://41.216.191.154:3128|http://34.44.49.215:80|http://145.220.227.208:8080|http://20.33.10.79:443|http://185.135.69.34:80|http://47.243.92.199:3128|http://66.151.34.89:80|http://47.85.161.37:3128|http://46.47.197.210:3128|http://109.199.119.160:80|http://117.0.76.112:2065|http://113.161.93.6:8080|http://51.75.206.209:80|http://161.97.94.168:6001|http://103.43.191.71:8888|http://194.150.110.134:80|http://8.213.151.128:3128|http://18.221.175.172:8000|http://157.173.115.35:1081|http://8.212.151.166:4100|http://103.173.162.49:8818|http://210.87.93.164:8080|http://142.93.202.130:3128|http://188.165.199.207:80|http://165.99.194.139:8080|http://112.211.84.86:8585|http://167.99.236.14:80|http://45.232.0.2:8080|http://103.195.102.123:10808|http://85.133.162.34:8080|http://45.125.64.215:443|http://91.107.143.251:80|http://165.154.162.73:8888",
+  "listaNombreRandom": "Edgar,Fabi,Fernando,Ramon,Ramona,Silvio,David,Siva,Pau,Carlo,Juan,Julieta,Sonia,Dani,Walter,Gissel"
+}
