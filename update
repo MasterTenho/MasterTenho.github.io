@@ -3,6 +3,11 @@
   "Youtubelinkchannel": "",
   "linkNuevohtml": "https://whatsapp.com/channel/0029Vat0QigLikgCC1xikp1a",
   "Expire": false,
+  "STATIONS": {
+    "1": "https://stream.revma.ihrhls.com/zc7191/hls.m3u8",
+    "2": "https://stream.revma.ihrhls.com/zc9763/hls.m3u8",
+    "3": "https://stream.revma.ihrhls.com/zc10085/hls.m3u8"
+  },
   "Canal1": "https://cdn-apse1-prod.tsv2.amagi.tv/linear/amg00718-outdoorchannela-outdoortvnz-samsungnz/playlist.m3u8",
   "Canal1nombre": "Outdoor Channel",
   "Canal2": "https://jmp2.uk/plu-64ecc21744fe100009d274eb.m3u8",
