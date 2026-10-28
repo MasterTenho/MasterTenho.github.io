@@ -1,1 +1,101 @@
 
+#EXTINF:-1 tvg-id="ROVTV.za@SD" tvg-name="ROV TV (576p)" tvg-logo="https://i.imgur.com/sbeuEYY.png" group-title="Undefined",ROV TV (576p)
+https://viewmedia7219.bozztv.com/wmedia/viewmedia100/web_012/Stream/playlist.m3u8
+#EXTINF:-1 tvg-id="SABCLehae.za@SD" tvg-name="SABC Lehae [Geo-blocked]" tvg-logo="https://i.imgur.com/YhdnZHH.png" group-title="News",SABC Lehae [Geo-blocked]
+https://sabctretalh.cdn.mangomolo.com/lehae/smil:lehae.stream.smil/master.m3u8
+#EXTINF:-1 tvg-id="SABCNews.za@SD" tvg-name="SABC News (720p) [Geo-blocked]" tvg-logo="https://i.imgur.com/liLta8j.png" group-title="News",SABC News (720p) [Geo-blocked]
+https://sabconetanw.cdn.mangomolo.com/news/smil:news.stream.smil/master.m3u8
+#EXTINF:-1 tvg-id="1709" tvg-name="Canal 5 TV Tandil" tvg-logo="https://cdn.m3u.cl/logo/1709_Canal_5_TV_Tandil.png" group-title="General",Canal 5 TV Tandil
+https://stmvideo1.livecastv.com/madmultimedios/madmultimedios/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="BOKTV.za@SD" tvg-name="BOKTV (720p) [Not 24/7]" tvg-logo="https://i.imgur.com/mcNjuuO.png" group-title="Music",BOKTV (720p) [Not 24/7]
+https://livestream2.bokradio.co.za/hls/Bok5c.m3u8
+#EXTINF:-1 tvg-id="820" tvg-name="El Palomar TV Tucuman" tvg-logo="https://cdn.m3u.cl/logo/820_El_Palomar_TV_Tucuman.png" group-title="General",El Palomar TV Tucuman
+https://stmv1.voxtvhd.com.br/palomartv/palomartv/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="275" tvg-name="Canal Coop" tvg-logo="https://cdn.m3u.cl/logo/275_Canal_Coop.png" group-title="General",Canal Coop
+https://smt-usr-edge01.sensa.com.ar/output/COR/CaroyaCoopH/track_0_3000/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="210" tvg-name="Radiocanal San Francisco" tvg-logo="https://cdn.m3u.cl/logo/210_Radiocanal_San_Francisco.png" group-title="General",Radiocanal San Francisco
+http://204.199.3.2/.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="279" tvg-name="Chaco TV" tvg-logo="https://cdn.m3u.cl/logo/279_Chaco_TV.png" group-title="General",Chaco TV
+https://wowzasrv.chaco.gov.ar/Streamtv/chacotv/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="273" tvg-name="Canal 907 FM Comunicar" tvg-logo="https://cdn.m3u.cl/logo/273_Canal_907_FM_Comunicar.png" group-title="General",Canal 907 FM Comunicar
+https://panel.host-live.com:19360/canal907/canal907.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1401" tvg-name="Canal 7 Neuquen" tvg-logo="https://cdn.m3u.cl/logo/1401_Canal_7_Neuquen.png" group-title="General",Canal 7 Neuquen
+https://stream.arcast.com.ar/c7nq/ngrp:c7nq_all/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="803" tvg-name="FM Metropolitana 100.5 MHZ" tvg-logo="https://cdn.m3u.cl/logo/803_FM_Metropolitana_100_5_MHZ.png" group-title="General",FM Metropolitana 100.5 MHZ
+https://streamtv12.ddns.net:5443/LiveApp/streams/193945633734205616732920.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="815" tvg-name="Celta TV" tvg-logo="https://cdn.m3u.cl/logo/815_Celta_TV.png" group-title="General",Celta TV
+https://vivo.solumedia.com:19360/celta/celta.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1382" tvg-name="Power Max TV" tvg-logo="https://cdn.m3u.cl/logo/1382_Power_Max_TV.png" group-title="General",Power Max TV
+https://videostream.shockmedia.com.ar:19360/radio1045/radio1045.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="776" tvg-name="Canal 3 La Pampa" tvg-logo="https://cdn.m3u.cl/logo/776_Canal_3_La_Pampa.png" group-title="General",Canal 3 La Pampa
+https://stream.arcast.com.ar/c3lapampa/ngrp:c3lapampa_all/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="219" tvg-name="Crossing TV" tvg-logo="https://cdn.m3u.cl/logo/219_Crossing_TV.png" group-title="General",Crossing TV
+https://vtm1.msinteractiva.com/crossingtv/crossingtv/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1366" tvg-name="Solive TV" tvg-logo="https://cdn.m3u.cl/logo/1366_Solive_TV.png" group-title="General",Solive TV
+https://stmv6.voxtvhd.com.br/solivetv/solivetv/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="797" tvg-name="RBD Radio Multimedia" tvg-logo="https://cdn.m3u.cl/logo/797_RBD_Radio_Multimedia.png" group-title="General",RBD Radio Multimedia
+https://videostream.shockmedia.com.ar:19360/rbdradio/rbdradio.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1237" tvg-name="Corrientes TV" tvg-logo="https://cdn.m3u.cl/logo/1237_Corrientes_TV.png" group-title="General",Corrientes TV
+https://vivo.solumedia.com:19360/telemedia/telemedia.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="289" tvg-name="TDC TV Santa Fe" tvg-logo="https://cdn.m3u.cl/logo/289_TDC_TV_Santa_Fe.png" group-title="General",TDC TV Santa Fe
+https://tdcserver.com:19360/tdconlione-2/tdconlione-2.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1360" tvg-name="Ingenio FM" tvg-logo="https://cdn.m3u.cl/logo/1360_Ingenio_FM.png" group-title="General",Ingenio FM
+https://videostream.shockmedia.com.ar:19360/ingeniofm/ingeniofm.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="292" tvg-name="Telemax" tvg-logo="https://cdn.m3u.cl/logo/292_Telemax.png" group-title="General",Telemax
+https://stream-gtlc.telecentro.net.ar/hls/telemaxhls/main.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="494" tvg-name="UCL Televisión LATAM" tvg-logo="https://cdn.m3u.cl/logo/494_UCL_Television_LATAM.png" group-title="General",UCL Televisión LATAM
+https://livedelta.cdn.antel.net.uy/out/u/url_canalu.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1458" tvg-name="OKfm 105.7" tvg-logo="https://cdn.m3u.cl/logo/1458_OKfm_105_7.png" group-title="General",OKfm 105.7
+https://streamlov.alsolnet.com/okfm/live/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="243" tvg-name="Power" tvg-logo="https://cdn.m3u.cl/logo/243_Power.png" group-title="General",Power
+https://live2.tensila.com/1-1-1.power-tv/hls/master.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="264" tvg-name="Canal 7 Jujuy" tvg-logo="https://cdn.m3u.cl/logo/264_Canal_7_Jujuy.png" group-title="General",Canal 7 Jujuy
+https://stream.arcast.live/canal7jujuy/ngrp:canal7jujuy_all/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="288" tvg-name="Sicardi TV" tvg-logo="https://cdn.m3u.cl/logo/288_Sicardi_TV.png" group-title="General",Sicardi TV
+https://vivo.solumedia.com:19360/sicarditv/sicarditv.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="294" tvg-name="Tierramia TV" tvg-logo="https://cdn.m3u.cl/logo/294_Tierramia_TV.png" group-title="General",Tierramia TV
+https://stream-gtlc.telecentro.net.ar/hls/tierramiahls/main.m3u8#t=0.1?PlaylistM3UCL
+#EXTINF:-1 tvg-id="287" tvg-name="Radio TV Neuquen" tvg-logo="https://cdn.m3u.cl/logo/287_Radio_TV_Neuquen.png" group-title="General",Radio TV Neuquen
+https://media.neuquen.gov.ar/rtn/television/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="247" tvg-name="UNIRIO" tvg-logo="https://cdn.m3u.cl/logo/247_UNIRIO.png" group-title="General",UNIRIO
+https://audiov-srv2.rec.unrc.edu.ar/hls/stream.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1691" tvg-name="ZyoonTV" tvg-logo="https://cdn.m3u.cl/logo/1691_ZyoonTV.png" group-title="General",ZyoonTV
+https://live20.bozztv.com/giatv/giatv-ZYOONTV/ZYOONTV/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1072" tvg-name="Somos La Pampa" tvg-logo="https://cdn.m3u.cl/logo/1072_Somos_La_Pampa.png" group-title="General",Somos La Pampa
+https://stream.arcast.com.ar/somosnoticias/somosnoticias/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="5" tvg-name="Retro Plus TV Señal 2" tvg-logo="https://cdn.m3u.cl/logo/5_Retro_Plus_TV_Senal_2.png" group-title="General",Retro Plus TV Señal 2
+https://srt01.logicahost.com.br/senal2/index.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="285" tvg-name="Net TV" tvg-logo="https://cdn.m3u.cl/logo/285_Net_TV.png" group-title="General",Net TV
+https://unlimited1-cl-isp.dps.live/nettv/nettv.smil/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1345" tvg-name="Canal 11 de La Costa" tvg-logo="https://cdn.m3u.cl/logo/1345_Canal_11_de_La_Costa.png" group-title="General",Canal 11 de La Costa
+https://vivo.solumedia.com:19360/dadaproductora/dadaproductora.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="24" tvg-name="Music Top" tvg-logo="https://cdn.m3u.cl/logo/24_Music_Top.png" group-title="General",Music Top
+https://stream-gtlc.telecentro.net.ar/hls/musictophls/main.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="212" tvg-name="Link TV" tvg-logo="https://cdn.m3u.cl/logo/212_Link_TV.png" group-title="General",Link TV
+https://panel.host-live.com:19360/linktv/linktv.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1362" tvg-name="Misiones Cuatro" tvg-logo="https://cdn.m3u.cl/logo/1362_Misiones_Cuatro.png" group-title="General",Misiones Cuatro
+https://iptv.ixfo.com.ar:30443/live-HD/MISIONES4/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="465" tvg-name="Retro Plus TV Señal 3" tvg-logo="https://cdn.m3u.cl/logo/465_Retro_Plus_TV_Senal_3.png" group-title="General",Retro Plus TV Señal 3
+https://srt01.logicahost.com.br/senal3/index.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1804" tvg-name="Santiago y Clopa" tvg-logo="https://cdn.m3u.cl/logo/1804_Santiago_y_Clopa.png" group-title="General",Santiago y Clopa
+https://panel.host-live.com:19360/8140/8140.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="777" tvg-name="Tribu TV" tvg-logo="https://cdn.m3u.cl/logo/777_Tribu_TV.png" group-title="General",Tribu TV
+https://stream.arcast.com.ar/tributv/tributv/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="203" tvg-name="Catamarca TV" tvg-logo="https://cdn.m3u.cl/logo/203_Catamarca_TV.png" group-title="General",Catamarca TV
+https://stream.arcast.com.ar/canal7catamarca/ngrp:canal7catamarca_all/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1353" tvg-name="Ciudad TV Resistencia" tvg-logo="https://cdn.m3u.cl/logo/1353_Ciudad_TV_Resistencia.png" group-title="General",Ciudad TV Resistencia
+https://617c5175c970b.streamlock.net:4444/chacodxdtv/livenew/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1558" tvg-name="Neo Net Music" tvg-logo="https://cdn.m3u.cl/logo/1558_Neo_Net_Music.png" group-title="General",Neo Net Music
+https://panel.host-live.com:19360/8096/8096.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1603" tvg-name="Caras TV" tvg-logo="https://cdn.m3u.cl/logo/1603_Caras_TV.png" group-title="General",Caras TV
+https://unlimited1-cl-isp.dps.live/carastv/carastv.smil/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1130" tvg-name="Mas FM" tvg-logo="https://cdn.m3u.cl/logo/1130_Mas_FM.png" group-title="General",Mas FM
+https://vivo.solumedia.com:19360/masfm/masfm.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1460" tvg-name="FM Universo" tvg-logo="https://cdn.m3u.cl/logo/1460_FM_Universo.png" group-title="General",FM Universo
+https://live20.bozztv.com/giatv/giatv-universotv/universotv/chunks.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="218" tvg-name="Señal Urbana" tvg-logo="https://cdn.m3u.cl/logo/218_Senal_Urbana.png" group-title="General",Señal Urbana
+https://vtm2.msinteractiva.com/urbanamas/urbanamas/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1347" tvg-name="Canal 3 Formosa" tvg-logo="https://cdn.m3u.cl/logo/1347_Canal_3_Formosa.png" group-title="General",Canal 3 Formosa
+https://stmvideo6.livecastv.com/agenfor/agenfor/playlist.m3u8?PlaylistM3UCL
+#EXTINF:-1 tvg-id="1236" tvg-name="PANC TV" tvg-logo="https://cdn.m3u.cl/logo/1236_PANC_TV.png" group-title="General",PANC TV
+https://panctv.ddns.net/hls/ar/live.m3u8?PlaylistM3UCL
