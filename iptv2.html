@@ -34,7 +34,7 @@ body {
 #loginBox {
   position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
   background: radial-gradient(ellipse at center, rgba(0,30,0,0.85) 0%, rgba(0,0,0,0.95) 100%);
-  z-index: 1000; padding: 20px;
+  z-index: 1000; padding: 20px; overflow-y: auto;
 }
 .login-card {
   background: rgba(0, 15, 0, 0.92); border: 2px solid var(--primary);
@@ -63,12 +63,14 @@ body {
   display: block; font-size: 0.72em; color: var(--primary);
   margin-bottom: 6px; letter-spacing: 1.5px; text-transform: uppercase;
 }
-.field input {
+.field input, .field textarea {
   width: 100%; padding: 11px 14px; border-radius: 4px;
   border: 1px solid var(--border); background: var(--bg);
   color: var(--text); font-size: 0.9em; outline: none; transition: all 0.2s;
+  font-family: inherit;
 }
-.field input:focus {
+.field textarea { min-height: 70px; resize: vertical; }
+.field input:focus, .field textarea:focus {
   border-color: var(--primary);
   box-shadow: 0 0 10px var(--primary-glow);
   background: rgba(0,20,0,0.9);
@@ -86,11 +88,81 @@ body {
 }
 .btn-primary:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary); }
 .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-secondary {
+  width: 100%; padding: 12px; border-radius: 4px; border: 1px solid var(--star);
+  background: transparent; color: var(--star); font-weight: 700;
+  font-size: 0.82em; cursor: pointer; letter-spacing: 2px;
+  text-transform: uppercase; transition: all 0.25s; margin-top: 10px;
+}
+.btn-secondary:hover { background: var(--star); color: #000; box-shadow: 0 0 20px var(--star-glow); }
+.btn-m3u {
+  width: 100%; padding: 12px; border-radius: 4px; border: 1px solid #00bfff;
+  background: transparent; color: #00bfff; font-weight: 700;
+  font-size: 0.82em; cursor: pointer; letter-spacing: 2px;
+  text-transform: uppercase; transition: all 0.25s; margin-top: 10px;
+}
+.btn-m3u:hover { background: #00bfff; color: #000; box-shadow: 0 0 20px rgba(0,191,255,0.6); }
 .error-msg {
   display: none; background: rgba(255,0,68,0.1);
   border: 1px solid var(--danger); color: var(--danger);
   padding: 10px; border-radius: 4px; font-size: 0.78em;
   margin-top: 12px; text-align: center;
+}
+.success-msg {
+  display: none; background: rgba(0,255,65,0.1);
+  border: 1px solid var(--primary); color: var(--primary);
+  padding: 10px; border-radius: 4px; font-size: 0.78em;
+  margin-top: 12px; text-align: center;
+}
+#serverSwitchModal {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+  z-index: 2500; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;
+}
+#serverSwitchModal.active { display: flex; }
+#m3uModal {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95);
+  z-index: 2500; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;
+}
+#m3uModal.active { display: flex; }
+.modal-card {
+  background: rgba(0, 15, 0, 0.95); border: 2px solid var(--primary);
+  border-radius: 12px; padding: 24px 20px; width: 100%; max-width: 440px;
+  box-shadow: 0 0 40px var(--primary-glow);
+}
+.modal-card h2 {
+  font-size: 1.1em; color: var(--primary); margin-bottom: 6px;
+  letter-spacing: 2px; text-align: center;
+}
+.modal-card .modal-sub {
+  font-size: 0.72em; color: var(--text-dim); text-align: center;
+  margin-bottom: 18px; letter-spacing: 1px;
+}
+.modal-card .field label { font-size: 0.7em; }
+.modal-card .close-x {
+  position: absolute; top: 12px; right: 12px; background: transparent;
+  border: 1px solid var(--danger); color: var(--danger); width: 32px; height: 32px;
+  border-radius: 50%; cursor: pointer; font-size: 1em;
+}
+.modal-card { position: relative; }
+.saved-servers { margin: 14px 0; }
+.saved-servers .saved-item {
+  padding: 10px 12px; background: var(--bg-2); border: 1px solid var(--border);
+  border-radius: 6px; margin-bottom: 6px; cursor: pointer; font-size: 0.8em;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: all 0.2s;
+}
+.saved-servers .saved-item:hover { border-color: var(--primary); background: rgba(0,20,0,0.9); }
+.saved-servers .saved-item .srv-name { color: var(--primary); font-weight: 700; }
+.saved-servers .saved-item .srv-user { color: var(--text-dim); font-size: 0.85em; }
+.saved-servers .saved-item .srv-del {
+  color: var(--danger); background: transparent; border: 1px solid var(--danger);
+  padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75em;
+}
+.saved-empty { text-align: center; color: var(--text-dim); font-size: 0.78em; padding: 14px; font-style: italic; }
+.section-title {
+  font-size: 0.75em; color: var(--text-dim); text-transform: uppercase;
+  letter-spacing: 2px; margin: 16px 0 8px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
 }
 #app { display: none; position: relative; z-index: 1; }
 header {
@@ -104,6 +176,7 @@ header {
 .header-top {
   display: flex; align-items: center; gap: 8px;
   max-width: 1400px; margin: 0 auto;
+  flex-wrap: wrap;
 }
 .logo {
   color: var(--primary); font-weight: 700; font-size: 0.95em;
@@ -111,7 +184,7 @@ header {
   text-shadow: 0 0 8px var(--primary);
 }
 .logo::before { content: '> '; opacity: 0.6; }
-.search-wrap { flex: 1; position: relative; }
+.search-wrap { flex: 1; position: relative; min-width: 140px; }
 .search-wrap input {
   width: 100%; padding: 8px 34px 8px 34px; border-radius: 4px;
   border: 1px solid var(--border); background: var(--bg);
@@ -151,9 +224,25 @@ header {
   background: var(--star); color: #000; border-color: var(--star);
   box-shadow: 0 0 12px var(--star-glow);
 }
+.btn-icon.switch-srv { border-color: rgba(0,191,255,0.5); color: #00bfff; }
+.btn-icon.switch-srv:hover {
+  background: #00bfff; color: #000; border-color: #00bfff;
+  box-shadow: 0 0 12px rgba(0,191,255,0.6);
+}
+.btn-icon.m3u-btn { border-color: rgba(255,215,0,0.5); color: var(--star); }
+.btn-icon.m3u-btn:hover {
+  background: var(--star); color: #000; border-color: var(--star);
+  box-shadow: 0 0 12px var(--star-glow);
+}
 .fav-badge {
   position: absolute; top: -4px; right: -4px;
   background: var(--star); color: #000;
+  font-size: 0.65em; font-weight: 700;
+  padding: 1px 5px; border-radius: 8px; min-width: 16px; text-align: center;
+}
+.srv-badge {
+  position: absolute; top: -4px; right: -4px;
+  background: #00bfff; color: #000;
   font-size: 0.65em; font-weight: 700;
   padding: 1px 5px; border-radius: 8px; min-width: 16px; text-align: center;
 }
@@ -219,12 +308,12 @@ header {
   padding: 0 14px;
   display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
 }
-.section-title {
+.section-title-header {
   color: var(--primary); font-weight: 700; font-size: 0.95em;
   letter-spacing: 1px; text-transform: uppercase;
   text-shadow: 0 0 8px var(--primary-glow);
 }
-.section-title::before { content: '◆ '; opacity: 0.6; }
+.section-title-header::before { content: '◆ '; opacity: 0.6; }
 .section-badge {
   padding: 3px 10px; border-radius: 10px;
   background: rgba(0,255,65,0.1); border: 1px solid var(--border);
@@ -341,6 +430,13 @@ header {
 }
 .btn-star-player:hover { background: var(--star); color: #000; box-shadow: 0 0 12px var(--star-glow); }
 .btn-star-player.active { background: var(--star); color: #000; box-shadow: 0 0 15px var(--star-glow); }
+.btn-send-main {
+  padding: 8px 12px; border-radius: 4px;
+  border: 1px solid #00bfff; background: transparent;
+  color: #00bfff; font-weight: 700; cursor: pointer;
+  font-size: 0.82em; transition: all 0.2s;
+}
+.btn-send-main:hover { background: #00bfff; color: #000; box-shadow: 0 0 12px rgba(0,191,255,0.6); }
 .btn-retry {
   padding: 8px 12px; border-radius: 4px;
   border: 1px solid #ffaa00; background: transparent;
@@ -519,6 +615,7 @@ header {
 
 <canvas id="matrixCanvas"></canvas>
 
+<!-- ==================== LOGIN ==================== -->
 <div id="loginBox">
   <div class="login-card">
     <h1>🟢 MATRIXXTECHNO</h1>
@@ -539,10 +636,73 @@ header {
       <input type="checkbox" id="lembrar" checked> Recordar credenciales
     </label>
     <button class="btn-primary" id="btnLogin" onclick="login()">▶ ACCEDER</button>
+    <button class="btn-m3u" onclick="abrirM3uModal()">📡 INICIAR CON M3U / M3U8</button>
     <div class="error-msg" id="errorMsg"></div>
+    <div class="success-msg" id="successMsg"></div>
   </div>
 </div>
 
+<!-- ==================== MODAL CAMBIAR SERVIDOR ==================== -->
+<div id="serverSwitchModal">
+  <div class="modal-card">
+    <button class="close-x" onclick="cerrarServerSwitch()">✖</button>
+    <h2>🔄 CAMBIAR SERVIDOR IPTV</h2>
+    <p class="modal-sub">Cambiá de servidor sin cerrar sesión</p>
+
+    <div class="field">
+      <label>Servidor</label>
+      <input type="text" id="ssServidor" placeholder="http://servidor.com:8080" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="ssUsuario" placeholder="Usuario" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="ssSenha" placeholder="Contraseña">
+    </div>
+    <button class="btn-primary" onclick="cambiarServidorDesdeModal()">▶ CONECTAR</button>
+    <div class="error-msg" id="ssErrorMsg"></div>
+
+    <div class="section-title">📋 Servidores guardados</div>
+    <div class="saved-servers" id="savedServersList">
+      <div class="saved-empty">Todavía no guardaste ningún servidor</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL M3U / M3U8 ==================== -->
+<div id="m3uModal">
+  <div class="modal-card">
+    <button class="close-x" onclick="cerrarM3uModal()">✖</button>
+    <h2>📡 INICIAR CON M3U / M3U8</h2>
+    <p class="modal-sub">Cargá una lista desde URL o archivo local</p>
+
+    <div class="field">
+      <label>URL de la lista M3U / M3U8</label>
+      <input type="text" id="m3uUrlInput" placeholder="https://ejemplo.com/lista.m3u" autocomplete="off">
+    </div>
+    <button class="btn-primary" onclick="cargarM3uDesdeUrl()">▶ CARGAR DESDE URL</button>
+
+    <div class="section-title" style="margin-top:18px">📁 O desde archivo local</div>
+    <div class="field">
+      <label>Archivo .m3u o .m3u8</label>
+      <input type="file" id="m3uFileInput" accept=".m3u,.m3u8,text/plain" onchange="cargarM3uDesdeArchivo(event)">
+    </div>
+
+    <div class="section-title" style="margin-top:18px">📋 O pegá la lista completa</div>
+    <div class="field">
+      <label>Contenido M3U</label>
+      <textarea id="m3uTextArea" placeholder="#EXTM3U&#10;#EXTINF:-1, Canal 1&#10;http://servidor/canal1.m3u8"></textarea>
+    </div>
+    <button class="btn-m3u" onclick="cargarM3uDesdeTexto()">▶ CARGAR DESDE TEXTO</button>
+
+    <div class="error-msg" id="m3uErrorMsg"></div>
+    <div class="success-msg" id="m3uSuccessMsg"></div>
+  </div>
+</div>
+
+<!-- ==================== APP ==================== -->
 <div id="app">
   <header>
     <div class="header-top">
@@ -551,6 +711,10 @@ header {
         <input type="text" id="busca" placeholder="Buscar..." oninput="onBuscaInput()">
         <button class="search-clear" id="searchClear" onclick="limpiarBusca()">✖</button>
       </div>
+      <button class="btn-icon switch-srv" onclick="abrirServerSwitch()" title="Cambiar servidor IPTV">
+        🔄<span class="srv-badge" id="srvBadge" style="display:none;">!</span>
+      </button>
+      <button class="btn-icon m3u-btn" onclick="abrirM3uModal()" title="Iniciar con M3U/M3U8">📡</button>
       <button class="btn-icon fav-btn" onclick="cambiarTab('fav')" title="Favoritos">
         ⭐<span class="fav-badge" id="favBadge" style="display:none;">0</span>
       </button>
@@ -569,7 +733,7 @@ header {
   <div class="sub-bar" id="subBar"></div>
 
   <div class="section-header" id="sectionHeader" style="display:none;">
-    <div class="section-title" id="sectionTitle"></div>
+    <div class="section-title-header" id="sectionTitle"></div>
     <div class="section-badge" id="sectionBadge"></div>
   </div>
 
@@ -588,9 +752,11 @@ header {
   </div>
 </div>
 
+<!-- ==================== PLAYER ==================== -->
 <div id="playerModal">
   <div class="player-header">
     <div class="player-title" id="playerTitulo">Reproduciendo</div>
+    <button class="btn-send-main" onclick="enviarAlPrincipal()" title="Enviar al reproductor principal">📤</button>
     <button class="btn-retry" onclick="reintentar()" title="Reintentar">↻</button>
     <button class="btn-star-player" id="btnStarPlayer" onclick="toggleFavActual()">☆</button>
     <button class="btn-close" onclick="cerrarPlayer()">✖</button>
@@ -608,6 +774,7 @@ header {
   </div>
 </div>
 
+<!-- ==================== EPISODIOS ==================== -->
 <div id="episodesModal">
   <div class="episodes-panel">
     <div class="episodes-header">
@@ -618,6 +785,7 @@ header {
   </div>
 </div>
 
+<!-- ==================== PIN ADULTO ==================== -->
 <div id="pinModal">
   <div class="pin-card">
     <h2>🔞 ADULTOS</h2>
@@ -649,6 +817,7 @@ header {
 <script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.all.min.js"></script>
 
 <script>
+/* ==================== MATRIX BACKGROUND ==================== */
 (function() {
   const canvas = document.getElementById('matrixCanvas');
   if (!canvas) return;
@@ -677,6 +846,7 @@ header {
   setInterval(draw, 50);
 })();
 
+/* ==================== CONSTANTES ==================== */
 const DEFAULT_SERVER = 'http://latinostvhd.club:8080';
 const DEFAULT_USER   = 'Jannylethbarroso';
 const DEFAULT_PASS   = 'fcca30a174';
@@ -684,8 +854,10 @@ const ADULT_PIN      = '0000';
 const LOTE = 60;
 const CACHE_KEY = 'matrixx_cat_v4';
 const FAV_KEY   = 'matrixx_favs_v1';
+const SRV_KEY   = 'matrixx_saved_servers_v1';
 const CACHE_TTL = 15 * 60 * 1000;
 
+/* ==================== ESTADO ==================== */
 let servidor = '', usuario = '', senha = '';
 let tabActual = 'live';
 let categoriaActual = '__ALL__';
@@ -705,6 +877,8 @@ let adultUnlocked = false;
 let pinBuffer = '';
 let favoritos = {};
 let busquedaTimeout = null;
+let modoM3U = false;         // si está cargada una lista M3U manual
+let listaM3U = [];           // canales cargados desde M3U
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -713,6 +887,7 @@ const normServidor = s => {
   return /^https?:\/\//i.test(s) ? s : 'http://' + s;
 };
 
+/* ==================== FAVORITOS ==================== */
 function favStorageKey() { return FAV_KEY + '_' + (usuario || 'anon'); }
 
 function cargarFavoritos() {
@@ -762,7 +937,8 @@ function toggleFavorito(item) {
       name: item.name,
       stream_icon: item.stream_icon || item.cover || item.movie_image || '',
       rating: item.rating, container_extension: item.container_extension,
-      category_name: item.category_name, tv_archive: item.tv_archive
+      category_name: item.category_name, tv_archive: item.tv_archive,
+      url: item.url || ''
     };
     mostrarToast('⭐ Añadido a favoritos');
     guardarFavoritos();
@@ -772,12 +948,349 @@ function toggleFavorito(item) {
 
 function mostrarToast(msg) {
   const t = $('toast');
+  if (!t) return;
   t.textContent = msg;
   t.classList.add('show');
   clearTimeout(t._timeout);
   t._timeout = setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+/* ==================== SERVIDORES GUARDADOS ==================== */
+function getServidoresGuardados() {
+  try {
+    const raw = localStorage.getItem(SRV_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) { return []; }
+}
+
+function saveServidorGuardado(srv, usr, pwd) {
+  if (!srv || !usr) return;
+  const list = getServidoresGuardados();
+  const existing = list.findIndex(s => s.srv === srv && s.usr === usr);
+  if (existing >= 0) {
+    list[existing] = { srv, usr, pwd, ts: Date.now() };
+  } else {
+    list.unshift({ srv, usr, pwd, ts: Date.now() });
+    if (list.length > 10) list.length = 10;
+  }
+  try { localStorage.setItem(SRV_KEY, JSON.stringify(list)); } catch (e) {}
+  renderServidoresGuardados();
+}
+
+function eliminarServidorGuardado(idx) {
+  const list = getServidoresGuardados();
+  list.splice(idx, 1);
+  try { localStorage.setItem(SRV_KEY, JSON.stringify(list)); } catch (e) {}
+  renderServidoresGuardados();
+}
+
+function renderServidoresGuardados() {
+  const list = getServidoresGuardados();
+  const cont = $('savedServersList');
+  if (!cont) return;
+  if (list.length === 0) {
+    cont.innerHTML = '<div class="saved-empty">Todavía no guardaste ningún servidor</div>';
+    return;
+  }
+  cont.innerHTML = '';
+  list.forEach((s, idx) => {
+    const div = document.createElement('div');
+    div.className = 'saved-item';
+    div.innerHTML = `
+      <div>
+        <div class="srv-name">${esc(s.srv)}</div>
+        <div class="srv-user">👤 ${esc(s.usr)}</div>
+      </div>
+      <button class="srv-del" onclick="event.stopPropagation();eliminarServidorGuardado(${idx})">✖</button>
+    `;
+    div.onclick = () => {
+      $('ssServidor').value = s.srv;
+      $('ssUsuario').value = s.usr;
+      $('ssSenha').value = s.pwd || '';
+    };
+    cont.appendChild(div);
+  });
+}
+
+/* ==================== MODAL CAMBIAR SERVIDOR ==================== */
+function abrirServerSwitch() {
+  $('ssServidor').value = servidor || '';
+  $('ssUsuario').value = usuario || '';
+  $('ssSenha').value = senha || '';
+  $('ssErrorMsg').style.display = 'none';
+  renderServidoresGuardados();
+  $('serverSwitchModal').classList.add('active');
+}
+
+function cerrarServerSwitch() {
+  $('serverSwitchModal').classList.remove('active');
+}
+
+async function cambiarServidorDesdeModal() {
+  const srv = normServidor($('ssServidor').value);
+  const usr = $('ssUsuario').value.trim();
+  const pwd = $('ssSenha').value.trim();
+  const errEl = $('ssErrorMsg');
+  errEl.style.display = 'none';
+
+  if (!srv || !usr || !pwd) {
+    errEl.textContent = 'Completá servidor, usuario y contraseña';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  try {
+    const apiUrl = `${srv}/player_api.php?username=${encodeURIComponent(usr)}&password=${encodeURIComponent(pwd)}`;
+    const res = await fetch(apiUrl, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.user_info) throw new Error('Respuesta inválida');
+    if (data.user_info.status !== 'Active') throw new Error('Cuenta inactiva');
+
+    // Guardar credenciales nuevas
+    servidor = srv; usuario = usr; senha = pwd;
+    modoM3U = false;
+    listaM3U = [];
+
+    localStorage.setItem('matrixx_srv', srv);
+    localStorage.setItem('matrixx_usr', usr);
+    localStorage.setItem('matrixx_pwd', pwd);
+    localStorage.setItem('ip2_srv', srv);
+    localStorage.setItem('ip2_usr', usr);
+    localStorage.setItem('ip2_pwd', pwd);
+    localStorage.setItem('iptv2_host', srv);
+    localStorage.setItem('iptv2_user', usr);
+    localStorage.setItem('iptv2_pass', pwd);
+
+    saveServidorGuardado(srv, usr, pwd);
+
+    // Resetear estado
+    sessionStorage.removeItem(CACHE_KEY);
+    datos = { live: [], vod: [], series: [], adult: [] };
+    categorias = { live: [], vod: [], series: [], adult: [] };
+    filtrados = [];
+    renderizados = 0;
+    categoriaActual = '__ALL__';
+    cargarFavoritos();
+
+    cerrarServerSwitch();
+    mostrarToast('🔄 Servidor cambiado, recargando catálogo...');
+
+    // Mostrar app y recargar
+    $('loginBox').style.display = 'none';
+    $('app').style.display = 'block';
+    await cargarTodo(true);
+
+  } catch (e) {
+    console.error('Cambiar servidor:', e);
+    errEl.textContent = e.message === 'Failed to fetch'
+      ? 'No se pudo conectar. Verificá URL o CORS.'
+      : e.message;
+    errEl.style.display = 'block';
+  }
+}
+
+/* ==================== M3U / M3U8 ==================== */
+function abrirM3uModal() {
+  $('m3uErrorMsg').style.display = 'none';
+  $('m3uSuccessMsg').style.display = 'none';
+  $('m3uUrlInput').value = '';
+  $('m3uTextArea').value = '';
+  $('m3uFileInput').value = '';
+  $('m3uModal').classList.add('active');
+}
+
+function cerrarM3uModal() {
+  $('m3uModal').classList.remove('active');
+}
+
+function parseM3U(text) {
+  const canales = [];
+  if (!text) return canales;
+  const lines = text.split(/\r?\n/);
+  let actual = null;
+  for (const line of lines) {
+    const t = line.trim();
+    if (!t) continue;
+    if (t.startsWith('#EXTINF:')) {
+      const info = t.substring(8);
+      const lastComma = info.lastIndexOf(',');
+      const attrsPart = lastComma >= 0 ? info.substring(0, lastComma) : info;
+      const name = lastComma >= 0 ? info.substring(lastComma + 1).trim() : '';
+      const attrs = {};
+      const re = /([\w-]+)="([^"]*)"/g;
+      let m;
+      while ((m = re.exec(attrsPart)) !== null) attrs[m[1]] = m[2];
+      actual = {
+        name: attrs['tvg-name'] || name || 'Canal',
+        logo: attrs['tvg-logo'] || '',
+        group: attrs['group-title'] || 'General',
+        tvgId: attrs['tvg-id'] || '',
+        url: '',
+        _tipo: 'live'
+      };
+    } else if (!t.startsWith('#') && actual) {
+      actual.url = t;
+      if (actual.url) canales.push(actual);
+      actual = null;
+    }
+  }
+  return canales;
+}
+
+function cargarM3uDesdeUrl() {
+  const url = $('m3uUrlInput').value.trim();
+  const errEl = $('m3uErrorMsg');
+  const okEl = $('m3uSuccessMsg');
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+  if (!url) {
+    errEl.textContent = 'Pegá una URL válida';
+    errEl.style.display = 'block';
+    return;
+  }
+  fetch(url, { cache: 'no-store' })
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.text();
+    })
+    .then(text => {
+      const canales = parseM3U(text);
+      if (canales.length === 0) throw new Error('Lista vacía o formato inválido');
+      aplicarListaM3U(canales, url);
+      okEl.textContent = `✓ ${canales.length} canales cargados`;
+      okEl.style.display = 'block';
+      setTimeout(() => {
+        cerrarM3uModal();
+        $('loginBox').style.display = 'none';
+        $('app').style.display = 'block';
+      }, 600);
+    })
+    .catch(e => {
+      errEl.textContent = 'Error: ' + e.message;
+      errEl.style.display = 'block';
+    });
+}
+
+function cargarM3uDesdeArchivo(event) {
+  const file = event.target.files[0];
+  const errEl = $('m3uErrorMsg');
+  const okEl = $('m3uSuccessMsg');
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const canales = parseM3U(e.target.result);
+    if (canales.length === 0) {
+      errEl.textContent = 'Archivo vacío o formato inválido';
+      errEl.style.display = 'block';
+      return;
+    }
+    aplicarListaM3U(canales, file.name);
+    okEl.textContent = `✓ ${canales.length} canales cargados desde archivo`;
+    okEl.style.display = 'block';
+    setTimeout(() => {
+      cerrarM3uModal();
+      $('loginBox').style.display = 'none';
+      $('app').style.display = 'block';
+    }, 600);
+  };
+  reader.readAsText(file);
+}
+
+function cargarM3uDesdeTexto() {
+  const txt = $('m3uTextArea').value.trim();
+  const errEl = $('m3uErrorMsg');
+  const okEl = $('m3uSuccessMsg');
+  errEl.style.display = 'none';
+  okEl.style.display = 'none';
+  if (!txt) {
+    errEl.textContent = 'Pegá el contenido M3U';
+    errEl.style.display = 'block';
+    return;
+  }
+  const canales = parseM3U(txt);
+  if (canales.length === 0) {
+    errEl.textContent = 'Formato inválido';
+    errEl.style.display = 'block';
+    return;
+  }
+  aplicarListaM3U(canales, 'pegado');
+  okEl.textContent = `✓ ${canales.length} canales cargados`;
+  okEl.style.display = 'block';
+  setTimeout(() => {
+    cerrarM3uModal();
+    $('loginBox').style.display = 'none';
+    $('app').style.display = 'block';
+  }, 600);
+}
+
+function aplicarListaM3U(canales, fuente) {
+  modoM3U = true;
+  listaM3U = canales;
+  servidor = 'M3U:' + (fuente || 'manual');
+  usuario = 'm3u_user';
+  senha = '';
+
+  // Guardar como lista activa
+  localStorage.setItem('matrixx_srv', servidor);
+  localStorage.setItem('matrixx_usr', usuario);
+  localStorage.setItem('matrixx_pwd', senha);
+  localStorage.setItem('matrixx_m3u_active', '1');
+
+  // Cachear la lista
+  try { sessionStorage.setItem('matrixx_m3u_list', JSON.stringify(canales)); } catch(e){}
+
+  // Resetear estado y armar el catálogo
+  datos = { live: [], vod: [], series: [], adult: [] };
+  categorias = { live: [], vod: [], series: [], adult: [] };
+  filtrados = [];
+  renderizados = 0;
+  categoriaActual = '__ALL__';
+  adultUnlocked = false;
+  cargarFavoritos();
+
+  procesarListaM3U();
+}
+
+function procesarListaM3U() {
+  if (!modoM3U) return;
+  const canales = listaM3U;
+  const adultos = [];
+  const normales = [];
+  canales.forEach(c => {
+    if (esAdulto(c)) adultos.push({...c, _tipo: 'live'});
+    else normales.push(c);
+  });
+  datos.live = normales;
+  datos.vod = [];
+  datos.series = [];
+  datos.adult = adultos;
+  categorias.live = construirCategoriasM3U(normales);
+  categorias.vod = [];
+  categorias.series = [];
+  categorias.adult = construirCategoriasM3U(adultos);
+
+  // Contadores
+  $('countLive').textContent = datos.live.length;
+  $('countVod').textContent = 0;
+  $('countSeries').textContent = 0;
+
+  cambiarTab('live');
+}
+
+function construirCategoriasM3U(lista) {
+  const map = {};
+  lista.forEach(item => {
+    const cat = item.group || 'General';
+    if (!map[cat]) map[cat] = { key: cat, flag: '📡', name: cat, items: [] };
+    map[cat].items.push(item);
+  });
+  return Object.values(map).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/* ==================== PAISES Y CATEGORIAS ==================== */
 const PAISES = [
   { code: 'BR', flag: '🇧🇷', name: 'Brasil', kw: ['brasil','brazil','br ','br:','pt-br','globo','sbt','record','band','sportv','premiere','combate','bbb','brasileir'] },
   { code: 'AR', flag: '🇦🇷', name: 'Argentina', kw: ['argentina','arg ','tyc','eltrece','telefe'] },
@@ -807,25 +1320,6 @@ const PAISES = [
   { code: 'DE', flag: '🇩🇪', name: 'Alemania', kw: ['alemania','germany','deu ','ard','zdf'] },
   { code: 'GB', flag: '🇬🇧', name: 'Reino Unido', kw: ['united kingdom','inglaterra','england','gbr ','uk ','bbc','itv'] },
   { code: 'CA', flag: '🇨🇦', name: 'Canadá', kw: ['canada','canadá','can ','tsn','ctv'] },
-  { code: 'JP', flag: '🇯🇵', name: 'Japón', kw: ['japon','japón','japan','jpn '] },
-  { code: 'KR', flag: '🇰🇷', name: 'Corea', kw: ['corea','korea','kor '] },
-  { code: 'CN', flag: '🇨🇳', name: 'China', kw: ['china','chn ','cctv'] },
-  { code: 'IN', flag: '🇮🇳', name: 'India', kw: ['india','ind ','star plus','zee tv'] },
-  { code: 'TR', flag: '🇹🇷', name: 'Turquía', kw: ['turquia','turquía','turkey','tur ','trt'] },
-  { code: 'RU', flag: '🇷🇺', name: 'Rusia', kw: ['rusia','russia','rus ','rt '] },
-  { code: 'PL', flag: '🇵🇱', name: 'Polonia', kw: ['polonia','poland','pol '] },
-  { code: 'NL', flag: '🇳🇱', name: 'Países Bajos', kw: ['holanda','netherlands','nld '] },
-  { code: 'BE', flag: '🇧🇪', name: 'Bélgica', kw: ['belgica','bélgica','belgium','bel '] },
-  { code: 'CH', flag: '🇨🇭', name: 'Suiza', kw: ['suiza','switzerland','che '] },
-  { code: 'SE', flag: '🇸🇪', name: 'Suecia', kw: ['suecia','sweden','swe '] },
-  { code: 'NO', flag: '🇳🇴', name: 'Noruega', kw: ['noruega','norway','nor '] },
-  { code: 'DK', flag: '🇩🇰', name: 'Dinamarca', kw: ['dinamarca','denmark','dnk '] },
-  { code: 'AU', flag: '🇦🇺', name: 'Australia', kw: ['australia','aus '] },
-  { code: 'NZ', flag: '🇳🇿', name: 'Nueva Zelanda', kw: ['nueva zelanda','new zealand','nzl '] },
-  { code: 'ZA', flag: '🇿🇦', name: 'Sudáfrica', kw: ['sudafrica','south africa','zaf '] },
-  { code: 'EG', flag: '🇪🇬', name: 'Egipto', kw: ['egipto','egypt','egy '] },
-  { code: 'MA', flag: '🇲🇦', name: 'Marruecos', kw: ['marruecos','morocco','mar '] },
-  { code: 'ARAB', flag: '🌍', name: 'Árabe', kw: ['arab','arabe','árabe','mbc','al jazeera'] },
   { code: 'LAT', flag: '🌎', name: 'Latinoamérica', kw: ['latinoamerica','latinoamérica','latino','lat '] },
   { code: '24/7', flag: '🎬', name: '24/7', kw: ['24/7','24-7','24h','24 horas'] },
   { code: 'VIP', flag: '💎', name: 'VIP / Premium', kw: ['vip','premium','premiun','pro '] }
@@ -859,6 +1353,13 @@ function detectarCategoria(item) {
   return { key: 'OTROS', icon: '📡' };
 }
 
+function esAdulto(item) {
+  const texto = ((item.name || '') + ' ' + (item.category_name || '') + ' ' + (item.group || '')).toLowerCase();
+  const kw = ['adult','xxx','porn','sex','erotic','erótico','brazzers','playboy','penthouse','hustler','private','onlyfans','venus','dorcel','bangbros','milf','anal','hentai','sexy','18+','hot'];
+  return kw.some(p => texto.includes(p));
+}
+
+/* ==================== LOGIN ==================== */
 async function login() {
   const srv = normServidor($('servidor').value);
   const usr = $('usuario').value.trim();
@@ -866,6 +1367,7 @@ async function login() {
   const rec = $('lembrar').checked;
 
   $('errorMsg').style.display = 'none';
+  $('successMsg').style.display = 'none';
   if (!srv || !usr || !pwd) { mostrarError('Completa todos los campos'); return; }
 
   const btn = $('btnLogin');
@@ -881,12 +1383,22 @@ async function login() {
     if (data.user_info.status !== 'Active') throw new Error('Cuenta inactiva o expirada');
 
     servidor = srv; usuario = usr; senha = pwd;
+    modoM3U = false;
+    listaM3U = [];
+    localStorage.removeItem('matrixx_m3u_active');
     cargarFavoritos();
 
     if (rec) {
       localStorage.setItem('matrixx_srv', srv);
       localStorage.setItem('matrixx_usr', usr);
       localStorage.setItem('matrixx_pwd', pwd);
+      localStorage.setItem('ip2_srv', srv);
+      localStorage.setItem('ip2_usr', usr);
+      localStorage.setItem('ip2_pwd', pwd);
+      localStorage.setItem('iptv2_host', srv);
+      localStorage.setItem('iptv2_user', usr);
+      localStorage.setItem('iptv2_pass', pwd);
+      saveServidorGuardado(srv, usr, pwd);
     }
 
     $('loginBox').style.display = 'none';
@@ -915,16 +1427,13 @@ function logout() {
   localStorage.removeItem('matrixx_srv');
   localStorage.removeItem('matrixx_usr');
   localStorage.removeItem('matrixx_pwd');
+  localStorage.removeItem('matrixx_m3u_active');
   sessionStorage.removeItem(CACHE_KEY);
+  sessionStorage.removeItem('matrixx_m3u_list');
   location.reload();
 }
 
-function esAdulto(item) {
-  const texto = ((item.name || '') + ' ' + (item.category_name || '')).toLowerCase();
-  const kw = ['adult','xxx','porn','sex','erotic','erótico','brazzers','playboy','penthouse','hustler','private','onlyfans','venus','dorcel','bangbros','milf','anal','hentai','sexy','18+','hot'];
-  return kw.some(p => texto.includes(p));
-}
-
+/* ==================== CARGAR CATÁLOGO ==================== */
 async function cargarTodo(force = false) {
   if (cargando) return;
   cargando = true;
@@ -1037,6 +1546,15 @@ function finalizarCarga() {
 }
 
 async function recargar() {
+  if (modoM3U) {
+    if (listaM3U.length > 0) {
+      procesarListaM3U();
+      mostrarToast('Lista M3U recargada');
+    } else {
+      mostrarToast('No hay lista M3U cargada');
+    }
+    return;
+  }
   sessionStorage.removeItem(CACHE_KEY);
   datos = { live: [], vod: [], series: [], adult: [] };
   categorias = { live: [], vod: [], series: [], adult: [] };
@@ -1046,8 +1564,13 @@ async function recargar() {
   await cargarTodo(true);
 }
 
+/* ==================== TABS Y FILTROS ==================== */
 function cambiarTab(tab) {
   if (tab === 'adult' && !adultUnlocked) { pedirPinAdulto(); return; }
+  if (modoM3U && (tab === 'vod' || tab === 'series')) {
+    mostrarToast('Modo M3U: solo canales Live');
+    tab = 'live';
+  }
   tabActual = tab;
   categoriaActual = '__ALL__';
   document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
@@ -1211,6 +1734,7 @@ function limpiarBusca() {
   else aplicarFiltro();
 }
 
+/* ==================== RENDERIZADO DE CARDS ==================== */
 function renderizarLote() {
   const grid = $('grid');
   $('empty').style.display = 'none';
@@ -1260,7 +1784,7 @@ function crearCard(item) {
   const isFav = esFavorito(item);
   if (isFav) el.classList.add('is-fav');
 
-  const icono = item.stream_icon || item.cover || item.movie_image || '';
+  const icono = item.stream_icon || item.cover || item.movie_image || item.logo || '';
   const inicial = (item.name || '?').charAt(0).toUpperCase();
 
   const imgHtml = icono && icono.startsWith('http')
@@ -1312,7 +1836,9 @@ function crearCard(item) {
   return el;
 }
 
+/* ==================== ABRIR / REPRODUCIR ==================== */
 function construirURL(item) {
+  if (modoM3U) return item.url || '';
   const tipo = item._tipo || tabActual;
   const u = encodeURIComponent(usuario);
   const p = encodeURIComponent(senha);
@@ -1333,7 +1859,7 @@ function construirURL(item) {
 
 function abrirItem(item) {
   const tipo = item._tipo || tabActual;
-  if (tipo === 'series') {
+  if (tipo === 'series' && !modoM3U) {
     abrirSerie(item);
     return;
   }
@@ -1394,6 +1920,7 @@ function cerrarEpisodios() {
   $('episodesModal').classList.remove('active');
 }
 
+/* ==================== DETECCIÓN DE FORMATO ==================== */
 function detectarFormato(url) {
   const lower = url.toLowerCase().split('?')[0].split('#')[0];
   if (lower.endsWith('.m3u8') || lower.includes('.m3u8')) return 'hls';
@@ -1412,11 +1939,32 @@ function limpiarReproductores() {
   if (mpegtsPlayer) { try { mpegtsPlayer.destroy(); } catch(e){} mpegtsPlayer = null; }
 }
 
+/* ==================== REPRODUCIR ==================== */
 function reproducir(url, titulo, item) {
   urlActual = url;
   itemActual = item;
   $('playerTitulo').textContent = titulo || 'Reproduciendo';
   $('playerModal').classList.add('active');
+
+  // ✅ NUEVO: enviar canal al padre (index.html)
+  try {
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({
+        type: 'IPTV2_CHANNEL',
+        name: titulo || 'Canal IPTV2',
+        url: url,
+        tipo: (item && item._tipo) || tabActual,
+        stream_id: item ? (item.stream_id || item.series_id || item.id) : null
+      }, '*');
+    }
+  } catch(e) { console.warn('postMessage channel:', e); }
+
+  // ✅ NUEVO: BroadcastChannel (para pestaña aparte)
+  try {
+    const bc = new BroadcastChannel('matrixx_iptv');
+    bc.postMessage({ type: 'IPTV2_CHANNEL', name: titulo, url: url });
+    bc.close();
+  } catch(e) {}
 
   const btnStar = $('btnStarPlayer');
   if (item) {
@@ -1587,6 +2135,24 @@ function reintentar() {
   if (urlActual) reproducir(urlActual, $('playerTitulo').textContent, itemActual);
 }
 
+function enviarAlPrincipal() {
+  if (!urlActual) { mostrarToast('Nada reproduciendo'); return; }
+  try {
+    window.parent.postMessage({
+      type: 'IPTV2_CHANNEL',
+      name: $('playerTitulo').textContent,
+      url: urlActual,
+      tipo: (itemActual && itemActual._tipo) || tabActual
+    }, '*');
+    try {
+      const bc = new BroadcastChannel('matrixx_iptv');
+      bc.postMessage({ type: 'IPTV2_CHANNEL', name: $('playerTitulo').textContent, url: urlActual });
+      bc.close();
+    } catch(e){}
+    mostrarToast('📤 Enviado al reproductor principal');
+  } catch(e) { mostrarToast('Error al enviar'); }
+}
+
 function toggleFavActual() {
   if (!itemActual) return;
   const nowFav = toggleFavorito(itemActual);
@@ -1641,6 +2207,7 @@ function bajarVolumen() {
   v.volume = Math.max(0, v.volume - 0.1);
 }
 
+/* ==================== PIN ADULTO ==================== */
 function pedirPinAdulto() {
   pinBuffer = '';
   $('pinInput').value = '';
@@ -1683,6 +2250,7 @@ function verificarPin() {
   }
 }
 
+/* ==================== EVENTOS ==================== */
 document.addEventListener('keydown', (e) => {
   if (!$('pinModal').classList.contains('active')) return;
   if (/^[0-9]$/.test(e.key)) pinPress(e.key);
@@ -1696,6 +2264,8 @@ document.addEventListener('keydown', (e) => {
     if ($('pinModal').classList.contains('active')) cerrarPin();
     else if ($('playerModal').classList.contains('active')) cerrarPlayer();
     else if ($('episodesModal').classList.contains('active')) cerrarEpisodios();
+    else if ($('serverSwitchModal').classList.contains('active')) cerrarServerSwitch();
+    else if ($('m3uModal').classList.contains('active')) cerrarM3uModal();
   }
   if ($('playerModal').classList.contains('active') && !$('pinModal').classList.contains('active')) {
     if (e.key === ' ' || e.key === 'k') { e.preventDefault(); togglePlay(); }
@@ -1711,8 +2281,37 @@ document.addEventListener('keydown', (e) => {
   if (el) el.addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
 });
 
-/* ========= AUTO-LOGIN Y LECTURA DE CREDENCIALES COMPARTIDAS ========= */
+['ssServidor','ssUsuario','ssSenha'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('keypress', e => { if (e.key === 'Enter') cambiarServidorDesdeModal(); });
+});
+
+/* ==================== AUTO-LOGIN ==================== */
 function autoLoginFromStorage(){
+  // ¿Estaba activo el modo M3U?
+  const m3uActive = localStorage.getItem('matrixx_m3u_active') === '1';
+  if (m3uActive) {
+    try {
+      const raw = sessionStorage.getItem('matrixx_m3u_list');
+      if (raw) {
+        const canales = JSON.parse(raw);
+        if (Array.isArray(canales) && canales.length > 0) {
+          listaM3U = canales;
+          modoM3U = true;
+          servidor = localStorage.getItem('matrixx_srv') || 'M3U:manual';
+          usuario = localStorage.getItem('matrixx_usr') || 'm3u_user';
+          senha = '';
+          cargarFavoritos();
+          $('loginBox').style.display = 'none';
+          $('app').style.display = 'block';
+          procesarListaM3U();
+          return;
+        }
+      }
+    } catch(e) {}
+  }
+
+  // Login normal con servidor IPTV
   const srv = localStorage.getItem('ip2_srv')
            || localStorage.getItem('iptv2_host')
            || localStorage.getItem('matrixx_srv');
@@ -1723,7 +2322,7 @@ function autoLoginFromStorage(){
            || localStorage.getItem('iptv2_pass')
            || localStorage.getItem('matrixx_pwd');
 
-  if (srv && usr && pwd) {
+  if (srv && usr && pwd && srv.indexOf('M3U:') !== 0) {
     $('servidor').value = srv;
     $('usuario').value = usr;
     $('senha').value = pwd;
@@ -1740,12 +2339,21 @@ function autoLoginFromStorage(){
 
 window.addEventListener('load', autoLoginFromStorage);
 
-/* ========= POSTMESSAGE (recibe credenciales del padre) ========= */
+/* ==================== POSTMESSAGE (recibe credenciales del padre) ==================== */
 window.addEventListener('message', (ev) => {
   if (!ev.data || ev.data.type !== 'IPTV2_LOGIN') return;
   const srv = ev.data.host, usr = ev.data.user, pwd = ev.data.pass;
   if (!srv || !usr || !pwd) return;
   if (!$('servidor')) return;
+
+  // Si es una URL M3U directa, manejarla como lista
+  if (srv.indexOf('M3U:') === 0 || /\.m3u8?(\?|$)/i.test(srv)) {
+    // no tocar inputs de login, es un M3U
+    if ($('loginBox').style.display !== 'none') {
+      // El padre puede haber mandado credenciales mientras se ve login
+      // pero también puede ser un M3U que aún no cargó
+    }
+  }
 
   $('servidor').value = srv;
   $('usuario').value = usr;
