@@ -6,12 +6,12 @@
   "Youtubelinkchannel": "https://www.youtube.com/",
   "linkNuevohtml": "https://raw.githubusercontent.com/MasterTenho/MasterTenho.github.io/refs/heads/main/index.html",
 
-  "fondo1": "https://i.imgur.com/8XfqZ1T.jpg",
-  "fondo2": "https://i.imgur.com/2YtKq8L.jpg",
-  "fondo3": "https://i.imgur.com/5NmPq3V.jpg",
-  "fondoAuto": "https://i.imgur.com/9RzLw7X.jpg",
-  "fondoHack": "https://i.imgur.com/3KdFg6B.jpg",
-  "fondoMatrix": "https://i.imgur.com/7HcJp9Q.jpg",
+  "fondo1": "https://images.pexels.com/photos/37848366/pexels-photo-37848366.jpeg?_gl=1*1b5heau*_ga*NTc2MzAyMTc3LjE3OTI5NjQ1NDE.*_ga_8JE65Q40S6*czE3OTMyOTE3MzIkbzIkZzAkdDE3OTMyOTE3MzIkajYwJGwwJGgw",
+  "fondo2": "https://images.pexels.com/photos/37848366/pexels-photo-37848366.jpeg?_gl=1*1b5heau*_ga*NTc2MzAyMTc3LjE3OTI5NjQ1NDE.*_ga_8JE65Q40S6*czE3OTMyOTE3MzIkbzIkZzAkdDE3OTMyOTE3MzIkajYwJGwwJGgw",
+  "fondo3": "https://images.pexels.com/photos/37848366/pexels-photo-37848366.jpeg?_gl=1*1b5heau*_ga*NTc2MzAyMTc3LjE3OTI5NjQ1NDE.*_ga_8JE65Q40S6*czE3OTMyOTE3MzIkbzIkZzAkdDE3OTMyOTE3MzIkajYwJGwwJGgw",
+  "fondoAuto": "https://images.pexels.com/photos/37848366/pexels-photo-37848366.jpeg?_gl=1*1b5heau*_ga*NTc2MzAyMTc3LjE3OTI5NjQ1NDE.*_ga_8JE65Q40S6*czE3OTMyOTE3MzIkbzIkZzAkdDE3OTMyOTE3MzIkajYwJGwwJGgw",
+  "fondoHack": "https://images.pexels.com/photos/37848366/pexels-photo-37848366.jpeg?_gl=1*1b5heau*_ga*NTc2MzAyMTc3LjE3OTI5NjQ1NDE.*_ga_8JE65Q40S6*czE3OTMyOTE3MzIkbzIkZzAkdDE3OTMyOTE3MzIkajYwJGwwJGgw",
+  "fondoMatrix": "https://images.pexels.com/photos/37848366/pexels-photo-37848366.jpeg?_gl=1*1b5heau*_ga*NTc2MzAyMTc3LjE3OTI5NjQ1NDE.*_ga_8JE65Q40S6*czE3OTMyOTE3MzIkbzIkZzAkdDE3OTMyOTE3MzIkajYwJGwwJGgw",
 
   "STATIONS": {
     "1": "https://stream.revma.ihrhls.com/zc7191/hls.m3u8",
