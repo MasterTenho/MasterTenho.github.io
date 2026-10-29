@@ -317,7 +317,7 @@ header {
 .btn-quality.on { background: var(--primary); color: #000; }
 .quality-indicator {
   font-size: 0.72em; color: var(--primary); font-weight: 700;
-  padding: 4px 10px; border-radius: var(--radius-pill, 4px);
+  padding: 4px 10px; border-radius: 4px;
   background: rgba(0,255,65,0.1); border: 1px solid var(--primary);
   white-space: nowrap;
 }
@@ -362,6 +362,7 @@ header {
   position: absolute; inset: 0; display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 16px; padding: 24px;
   background: rgba(0,0,0,0.95); text-align: center; z-index: 20;
+  overflow-y: auto;
 }
 .video-error .icon { font-size: 3em; }
 .video-error .msg { color: var(--text-dim); font-size: 0.85em; max-width: 500px; line-height: 1.5; }
@@ -585,7 +586,7 @@ header {
 <div id="playerModal">
   <div class="player-header">
     <div class="player-title" id="playerTitulo">Reproduciendo</div>
-    <button class="btn-quality on" id="btnAutoQuality" onclick="toggleAutoQuality()" title="Auto-calidad adaptativa">⚙ AUTO</button>
+    <button class="btn-quality on" id="btnAutoQuality" onclick="toggleAutoQuality()">⚙ AUTO</button>
     <span class="quality-indicator" id="qualityIndicator">— · —</span>
     <button class="btn-send-main" onclick="enviarAlPrincipal()" title="Enviar al principal">📤</button>
     <button class="btn-retry" onclick="reintentar()" title="Reintentar">↻</button>
@@ -672,32 +673,20 @@ const CONN_KEY  = 'matrixx_conn_mode';
 const AUTOQ_KEY = 'matrixx_auto_quality';
 const CACHE_TTL = 15 * 60 * 1000;
 
-/* ============ PROXIES CORS ============ */
 const CORS_PROXIES = [
   { name: 'allorigins', build: u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u) },
   { name: 'corsproxy.io', build: u => 'https://corsproxy.io/?' + encodeURIComponent(u) },
   { name: 'thingproxy', build: u => 'https://thingproxy.freeboard.io/fetch/' + u }
 ];
 
-/* ============ CONFIG DEL REPRODUCTOR UNIVERSAL ============ */
 const PLAYER_CONFIG = {
-  timeoutTotal: 90000,       // 90s total (generoso para IPTV lento)
-  timeoutManifest: 35000,    // 35s para manifest
-  timeoutFragment: 50000,    // 50s para fragmentos
-  retries: 6,                // 6 reintentos
-  retryDelay: 2500,          // 2.5s entre reintentos
-  maxBufferLength: 90,       // 90s de buffer
-  maxMaxBufferLength: 600,
-  maxBufferSize: 150 * 1000 * 1000, // 150 MB
-  lowLatencyMode: false,
-  abrEwmaDefaultEstimate: 800000,
-  // Auto-calidad adaptativa
-  autoQualityEnabled: true,
-  qualityCheckInterval: 3000,   // chequear cada 3s
-  lowBufferThreshold: 5,        // <5s de buffer = señal baja
-  criticalBufferThreshold: 2,   // <2s = señal crítica
-  lowBandwidthThreshold: 500000, // <500 Kbps = bajar calidad
-  stableTimeBeforeUpgrade: 20000 // 20s estable antes de subir calidad
+  timeoutTotal: 90000, timeoutManifest: 35000, timeoutFragment: 50000,
+  retries: 6, retryDelay: 2500,
+  maxBufferLength: 90, maxMaxBufferLength: 600, maxBufferSize: 150 * 1000 * 1000,
+  lowLatencyMode: false, abrEwmaDefaultEstimate: 800000,
+  autoQualityEnabled: true, qualityCheckInterval: 3000,
+  lowBufferThreshold: 5, criticalBufferThreshold: 2,
+  lowBandwidthThreshold: 500000, stableTimeBeforeUpgrade: 20000
 };
 
 /* ============ MODO DE CONEXIÓN ============ */
@@ -711,16 +700,15 @@ function setConnectionMode(mode) {
     if (mode === 'direct') {
       d.classList.add('active'); p.classList.remove('active');
       s.className = 'conn-status direct-active';
-      s.innerHTML = '🟢 Modo <b>DIRECTO</b> — fetch() normal, más rápido';
+      s.innerHTML = '🟢 Modo <b>DIRECTO</b> — fetch() normal';
     } else {
       p.classList.add('active'); d.classList.remove('active');
       s.className = 'conn-status proxy-active';
-      s.innerHTML = '🟣 Modo <b>PROXY CORS</b> — pasa por 3 proxies automáticos';
+      s.innerHTML = '🟣 Modo <b>PROXY CORS</b> — pasa por 3 proxies';
     }
   }
   updateConnToggleHeader();
 }
-
 function updateConnToggleHeader() {
   const btn = $('connToggleHeader');
   if (!btn) return;
@@ -732,7 +720,6 @@ function updateConnToggleHeader() {
     btn.innerHTML = '🟣 <span id="connToggleText">PROXY</span>';
   }
 }
-
 function toggleConnectionMode() {
   const newMode = connectionMode === 'direct' ? 'proxy' : 'direct';
   setConnectionMode(newMode);
@@ -745,7 +732,13 @@ function toggleConnectionMode() {
 /* ============ FETCH INTELIGENTE ============ */
 async function fetchSmart(url, options = {}) {
   const timeout = options.timeout || 15000;
-
+  // Detectar mixed content
+  const isHttpsPage = location.protocol === 'https:';
+  const isHttpUrl = url.startsWith('http://');
+  if (isHttpsPage && isHttpUrl && connectionMode === 'direct') {
+    console.warn('[FETCH] Mixed content detectado, forzando proxy');
+    connectionMode = 'proxy';
+  }
   if (connectionMode === 'direct') {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), timeout);
@@ -759,7 +752,6 @@ async function fetchSmart(url, options = {}) {
       throw new Error(`Conexión directa falló (${e.message}). Probá PROXY CORS.`);
     }
   }
-
   let lastError = null;
   for (const proxy of CORS_PROXIES) {
     const proxyUrl = proxy.build(url);
@@ -1499,9 +1491,8 @@ function reproducirEpisodio(epId, titulo, ext) {
 function cerrarEpisodios() { $('episodesModal').classList.remove('active'); }
 
 /* ============================================================
-   REPRODUCTOR UNIVERSAL — M3U8 (con/sin key), MPD, TS, MP4
+   REPRODUCTOR UNIVERSAL
    ============================================================ */
-
 function detectarFormato(url) {
   const lower = url.toLowerCase().split('?')[0].split('#')[0];
   if (lower.endsWith('.m3u8') || lower.endsWith('.m3u')) return 'hls';
@@ -1580,11 +1571,7 @@ async function reproducir(url, titulo, item) {
   const globalTimeout = setTimeout(() => {
     clearUI();
     mostrarErrorVideo(
-      '⏱️ Tiempo de espera agotado (' + (PLAYER_CONFIG.timeoutTotal/1000) + 's).\n\n' +
-      'El canal puede estar:\n' +
-      '• Caído o lento\n' +
-      '• Requiere autenticación\n' +
-      '• Bloqueado por red',
+      '⏱️ Tiempo de espera agotado (' + (PLAYER_CONFIG.timeoutTotal/1000) + 's).',
       url
     );
   }, PLAYER_CONFIG.timeoutTotal);
@@ -1606,7 +1593,7 @@ async function reproducir(url, titulo, item) {
     if (fallbackTried) {
       clearTimeout(globalTimeout);
       clearUI();
-      mostrarErrorVideo('❌ No se pudo reproducir en ningún formato.\n\nFormato inicial: ' + formato, url);
+      mostrarErrorVideo('❌ No se pudo reproducir en ningún formato.', url);
       return;
     }
     fallbackTried = true;
@@ -1625,27 +1612,21 @@ async function reproducir(url, titulo, item) {
   }
 }
 
-/* ============ HLS con soporte key AES y auto-calidad ============ */
+/* ============ HLS ============ */
 async function intentarHLS(url, video, wrap, clearUI, setStatus) {
   setStatus('🎬 Cargando HLS...');
-
   if (video.canPlayType('application/vnd.apple.mpegurl') && !/Chrome|Firefox|Edge/i.test(navigator.userAgent)) {
     video.src = url;
     try { await video.play(); } catch(e){}
     return;
   }
-
   if (!window.Hls || !Hls.isSupported()) throw new Error('HLS no soportado');
-
   return new Promise((resolve, reject) => {
     hlsInstance = new Hls({
-      enableWorker: true,
-      lowLatencyMode: false,
-      backBufferLength: 90,
+      enableWorker: true, lowLatencyMode: false, backBufferLength: 90,
       maxBufferLength: PLAYER_CONFIG.maxBufferLength,
       maxMaxBufferLength: PLAYER_CONFIG.maxMaxBufferLength,
-      maxBufferSize: PLAYER_CONFIG.maxBufferSize,
-      maxBufferHole: 0.5,
+      maxBufferSize: PLAYER_CONFIG.maxBufferSize, maxBufferHole: 0.5,
       manifestLoadingTimeOut: PLAYER_CONFIG.timeoutManifest,
       manifestLoadingMaxRetry: PLAYER_CONFIG.retries,
       manifestLoadingRetryDelay: PLAYER_CONFIG.retryDelay,
@@ -1655,40 +1636,27 @@ async function intentarHLS(url, video, wrap, clearUI, setStatus) {
       fragLoadingTimeOut: PLAYER_CONFIG.timeoutFragment,
       fragLoadingMaxRetry: PLAYER_CONFIG.retries,
       fragLoadingRetryDelay: PLAYER_CONFIG.retryDelay,
-      startLevel: -1,
-      capLevelToPlayerSize: false,
+      startLevel: -1, capLevelToPlayerSize: false,
       abrEwmaDefaultEstimate: PLAYER_CONFIG.abrEwmaDefaultEstimate,
-      enableSoftwareAES: true,
-      debug: false
+      enableSoftwareAES: true, debug: false
     });
-
     hlsInstance.on(Hls.Events.MANIFEST_PARSED, (event, data) => {
       currentLevelInfo.total = data.levels.length;
       setStatus(`🎬 ${data.levels.length} calidades`);
-      if (data.levels.length > 0 && !autoQualityEnabled) {
-        hlsInstance.currentLevel = data.levels.length - 1;
-      }
+      if (data.levels.length > 0 && !autoQualityEnabled) hlsInstance.currentLevel = data.levels.length - 1;
       video.play().catch(() => {});
       updateQualityIndicator('AUTO', data.levels.length + ' niveles');
     });
-
     hlsInstance.on(Hls.Events.LEVEL_SWITCHED, (event, data) => {
       currentLevelInfo.current = data.level;
       updateQualityIndicator('AUTO', `N${data.level + 1}/${currentLevelInfo.total}`);
     });
-
-    hlsInstance.on(Hls.Events.FRAG_LOADED, () => {
-      if (!cleared) setStatus('🎬 Reproduciendo');
-    });
-
-    hlsInstance.on(Hls.Events.KEY_LOADED, () => {
-      console.log('[HLS] Key AES cargada');
-    });
-
+    hlsInstance.on(Hls.Events.FRAG_LOADED, () => { if (!cleared) setStatus('🎬 Reproduciendo'); });
+    hlsInstance.on(Hls.Events.KEY_LOADED, () => console.log('[HLS] Key AES'));
     hlsInstance.on(Hls.Events.ERROR, (event, data) => {
       if (!data.fatal) {
         if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
-          setStatus('🌐 Error de red, reintentando...');
+          setStatus('🌐 Error red, reintentando...');
           setTimeout(() => { try { hlsInstance.startLoad(); } catch(e){} }, PLAYER_CONFIG.retryDelay);
         } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
           try { hlsInstance.recoverMediaError(); } catch(e){}
@@ -1696,23 +1664,19 @@ async function intentarHLS(url, video, wrap, clearUI, setStatus) {
         return;
       }
       clearUI();
-      if (data.details === 'manifestLoadError') reject(new Error('No se pudo cargar manifest (CORS/caído)'));
-      else if (data.details === 'manifestParsingError') reject(new Error('Manifest inválido'));
-      else if (data.details === 'keyLoadError') reject(new Error('Key AES no accesible'));
+      if (data.details === 'manifestLoadError') reject(new Error('manifest (CORS/caído)'));
+      else if (data.details === 'manifestParsingError') reject(new Error('manifest inválido'));
+      else if (data.details === 'keyLoadError') reject(new Error('key AES'));
       else reject(new Error('HLS: ' + data.details));
     });
-
-    try {
-      hlsInstance.loadSource(url);
-      hlsInstance.attachMedia(video);
-    } catch (e) { reject(e); }
+    try { hlsInstance.loadSource(url); hlsInstance.attachMedia(video); } catch (e) { reject(e); }
   });
 }
 
-/* ============ DASH (MPD) ============ */
+/* ============ DASH ============ */
 async function intentarDASH(url, video, wrap, clearUI, setStatus) {
   setStatus('🎬 Cargando DASH...');
-  if (!window.dashjs) throw new Error('DASH.js no disponible');
+  if (!window.dashjs) throw new Error('DASH no disponible');
   return new Promise((resolve, reject) => {
     try {
       dashInstance = dashjs.MediaPlayer().create();
@@ -1731,7 +1695,7 @@ async function intentarDASH(url, video, wrap, clearUI, setStatus) {
       });
       dashInstance.on('error', (e) => {
         clearUI();
-        reject(new Error('DASH: ' + (e.error ? e.error.message : 'error')));
+        reject(new Error('DASH error'));
       });
       dashInstance.initialize(video, url, true);
     } catch (e) { reject(e); }
@@ -1746,9 +1710,7 @@ async function intentarMPEGTS(url, video, wrap, clearUI, setStatus) {
   }
   return new Promise((resolve, reject) => {
     try {
-      mpegtsPlayer = mpegts.createPlayer({
-        type: 'mpegts', isLive: true, url: url
-      }, {
+      mpegtsPlayer = mpegts.createPlayer({ type: 'mpegts', isLive: true, url: url }, {
         enableWorker: true, lazyLoad: false,
         liveBufferLatencyChasing: true,
         liveBufferLatencyMaxLatency: 3.0,
@@ -1769,21 +1731,96 @@ async function intentarMPEGTS(url, video, wrap, clearUI, setStatus) {
   });
 }
 
-/* ============ NATIVO (MP4, etc) ============ */
+/* ============ NATIVO MEJORADO ============ */
 async function intentarNativo(url, video, wrap, clearUI, setStatus) {
   setStatus('🎬 Cargando video...');
+  try {
+    await intentarNativoDirecto(url, video, wrap, clearUI, setStatus);
+    return;
+  } catch (e) {
+    console.warn('[NATIVO] Directo falló:', e.message);
+  }
+  if (connectionMode === 'direct') {
+    setStatus('🔄 Probando con proxy CORS...');
+    try {
+      const proxyUrl = await getProxiedUrlForVideo(url);
+      if (proxyUrl) {
+        await intentarNativoDirecto(proxyUrl, video, wrap, clearUI, setStatus);
+        return;
+      }
+    } catch (e) {}
+  }
+  setStatus('🔄 Probando como HLS...');
+  try { await intentarHLS(url, video, wrap, clearUI, setStatus); return; } catch(e) {}
+  setStatus('🔄 Probando como TS...');
+  try { await intentarMPEGTS(url, video, wrap, clearUI, setStatus); return; } catch(e) {}
+  throw new Error('Servidor no devolvió video válido');
+}
+
+async function intentarNativoDirecto(url, video, wrap, clearUI, setStatus) {
   return new Promise((resolve, reject) => {
+    try { video.pause(); } catch(e){}
+    video.removeAttribute('src');
+    while (video.firstChild) video.removeChild(video.firstChild);
+    try { video.load(); } catch(e){}
+
+    let settled = false;
+    const finish = (ok, err) => {
+      if (settled) return;
+      settled = true;
+      video.removeEventListener('loadeddata', onLoad);
+      video.removeEventListener('error', onErr);
+      if (ok) resolve(); else reject(err);
+    };
+    const onLoad = () => {
+      clearUI();
+      setStatus('🎬 Reproduciendo...');
+      updateQualityIndicator('FILE', '—');
+      video.play().catch(() => {});
+      finish(true);
+    };
+    const onErr = () => {
+      const err = video.error;
+      let code = 'desconocido';
+      if (err) {
+        if (err.code === 1) code = 'ABORTED';
+        else if (err.code === 2) code = 'NETWORK';
+        else if (err.code === 3) code = 'DECODE';
+        else if (err.code === 4) code = 'SRC_NOT_SUPPORTED';
+      }
+      finish(false, new Error('No soportado: ' + code));
+    };
+    video.addEventListener('loadeddata', onLoad);
+    video.addEventListener('error', onErr);
+    setTimeout(() => { if (!settled) finish(false, new Error('timeout')); }, 15000);
     video.src = url;
     video.load();
-    const p = video.play();
-    if (p && p.catch) {
-      p.catch(e => {
-        if (e.name === 'NotAllowedError') { setStatus('▶ Pulsa para reproducir'); resolve(); }
-        else reject(e);
-      });
-    } else resolve();
-    updateQualityIndicator('FILE', '—');
+    video.play().catch(e => {
+      if (e.name === 'NotAllowedError') {
+        setStatus('▶ Pulsa para reproducir');
+        finish(true);
+      }
+    });
   });
+}
+
+async function getProxiedUrlForVideo(url) {
+  for (const proxy of CORS_PROXIES) {
+    const proxyUrl = proxy.build(url);
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 10000);
+      const res = await fetch(proxyUrl, { method: 'HEAD', signal: ctrl.signal, cache: 'no-store' });
+      clearTimeout(timer);
+      if (res.ok) {
+        const ct = res.headers.get('content-type') || '';
+        if (ct.includes('video') || ct.includes('octet-stream') || ct.includes('mp4') || ct.includes('mpeg')) {
+          return proxyUrl;
+        }
+      }
+    } catch (e) {}
+  }
+  try { return CORS_PROXIES[0].build(url); } catch(e) { return null; }
 }
 
 /* ============ FALLBACK ============ */
@@ -1806,33 +1843,26 @@ async function probarFallback(url, video, wrap, clearUI, setStatus, formatoOrigi
     }
   }
   clearUI();
-  mostrarErrorVideo('❌ No se pudo reproducir en ningún formato.\n\nProbados: ' + orden.join(', '), url);
+  mostrarErrorVideo('❌ No se pudo reproducir en ningún formato.', url);
 }
 
-/* ============ AUTO-CALIDAD ADAPTATIVA ============ */
+/* ============ AUTO-CALIDAD ============ */
 function updateQualityIndicator(label, info) {
   const el = $('qualityIndicator');
   if (!el) return;
   el.textContent = `${label} · ${info}`;
   el.className = 'quality-indicator';
 }
-
 function startAutoQualityMonitor() {
   if (autoQualityTimer) clearInterval(autoQualityTimer);
-  if (!autoQualityEnabled) {
-    updateQualityIndicator('MANUAL', '—');
-    return;
-  }
+  if (!autoQualityEnabled) { updateQualityIndicator('MANUAL', '—'); return; }
   autoQualityTimer = setInterval(checkQuality, PLAYER_CONFIG.qualityCheckInterval);
 }
-
 function checkQuality() {
   if (!hlsInstance || !autoQualityEnabled) return;
   const video = $('videoEl');
   if (!video || video.paused) return;
-
-  const buffered = video.buffered;
-  const currentTime = video.currentTime;
+  const buffered = video.buffered, currentTime = video.currentTime;
   let bufferAhead = 0;
   if (buffered.length > 0) {
     for (let i = 0; i < buffered.length; i++) {
@@ -1842,66 +1872,42 @@ function checkQuality() {
       }
     }
   }
-
   const levels = hlsInstance.levels || [];
   if (levels.length <= 1) return;
   const currentLevel = hlsInstance.currentLevel;
-
-  // SEÑAL CRÍTICA: bajar calidad urgente
   if (bufferAhead < PLAYER_CONFIG.criticalBufferThreshold && currentLevel > 0) {
     const newLevel = Math.max(0, currentLevel - 2);
     try { hlsInstance.currentLevel = newLevel; } catch(e){}
     const el = $('qualityIndicator');
-    if (el) {
-      el.textContent = `🔴 SEÑAL CRÍTICA · bajando a N${newLevel + 1}`;
-      el.className = 'quality-indicator critical';
-    }
+    if (el) { el.textContent = `🔴 SEÑAL CRÍTICA · bajando a N${newLevel + 1}`; el.className = 'quality-indicator critical'; }
     qualityStableSince = Date.now();
     return;
   }
-
-  // SEÑAL BAJA: bajar calidad
   if (bufferAhead < PLAYER_CONFIG.lowBufferThreshold && currentLevel > 0) {
     const newLevel = Math.max(0, currentLevel - 1);
     try { hlsInstance.currentLevel = newLevel; } catch(e){}
     const el = $('qualityIndicator');
-    if (el) {
-      el.textContent = `🟡 SEÑAL BAJA · bajando a N${newLevel + 1}`;
-      el.className = 'quality-indicator low';
-    }
+    if (el) { el.textContent = `🟡 SEÑAL BAJA · bajando a N${newLevel + 1}`; el.className = 'quality-indicator low'; }
     qualityStableSince = Date.now();
     return;
   }
-
-  // SEÑAL ESTABLE: subir calidad si pasó suficiente tiempo
   if (bufferAhead > PLAYER_CONFIG.lowBufferThreshold * 2 && currentLevel < levels.length - 1) {
     const stableFor = Date.now() - qualityStableSince;
     if (stableFor > PLAYER_CONFIG.stableTimeBeforeUpgrade) {
       const newLevel = Math.min(levels.length - 1, currentLevel + 1);
       try { hlsInstance.currentLevel = newLevel; } catch(e){}
       const el = $('qualityIndicator');
-      if (el) {
-        el.textContent = `🟢 SEÑAL OK · subiendo a N${newLevel + 1}`;
-        el.className = 'quality-indicator';
-      }
+      if (el) { el.textContent = `🟢 SEÑAL OK · subiendo a N${newLevel + 1}`; el.className = 'quality-indicator'; }
       qualityStableSince = Date.now();
     } else {
       const el = $('qualityIndicator');
-      if (el) {
-        const secs = Math.round(stableFor / 1000);
-        el.textContent = `🟢 ESTABLE · N${currentLevel + 1} (${secs}s)`;
-        el.className = 'quality-indicator';
-      }
+      if (el) { el.textContent = `🟢 ESTABLE · N${currentLevel + 1}`; el.className = 'quality-indicator'; }
     }
   } else {
     const el = $('qualityIndicator');
-    if (el) {
-      el.textContent = `🟢 OK · N${currentLevel + 1}/${levels.length}`;
-      el.className = 'quality-indicator';
-    }
+    if (el) { el.textContent = `🟢 OK · N${currentLevel + 1}/${levels.length}`; el.className = 'quality-indicator'; }
   }
 }
-
 function toggleAutoQuality() {
   autoQualityEnabled = !autoQualityEnabled;
   try { localStorage.setItem(AUTOQ_KEY, autoQualityEnabled ? '1' : '0'); } catch(e){}
@@ -1910,25 +1916,52 @@ function toggleAutoQuality() {
     btn.classList.toggle('on', autoQualityEnabled);
     btn.textContent = autoQualityEnabled ? '⚙ AUTO' : '⚙ MANUAL';
   }
-  if (autoQualityEnabled) {
-    startAutoQualityMonitor();
-    mostrarToast('🟢 Auto-calidad activada');
-  } else {
+  if (autoQualityEnabled) { startAutoQualityMonitor(); mostrarToast('🟢 Auto-calidad activada'); }
+  else {
     if (autoQualityTimer) { clearInterval(autoQualityTimer); autoQualityTimer = null; }
     if (hlsInstance && hlsInstance.levels && hlsInstance.levels.length > 0) {
       hlsInstance.currentLevel = hlsInstance.levels.length - 1;
     }
     updateQualityIndicator('MANUAL', 'máx calidad');
-    mostrarToast('🟡 Auto-calidad desactivada (máx calidad)');
+    mostrarToast('🟡 Auto-calidad desactivada');
   }
 }
 
-/* ============ ERROR / RETRY ============ */
-function mostrarErrorVideo(msg, url) {
+/* ============ ERROR + RETRY ============ */
+async function mostrarErrorVideo(msg, url) {
   const wrap = $('videoWrap');
   const old = wrap.querySelector('.video-error'); if (old) old.remove();
-  const div = document.createElement('div'); div.className = 'video-error';
-  div.innerHTML = `<div class="icon">📡</div><div class="msg" style="white-space:pre-wrap">${esc(msg)}</div><div style="font-size:0.7em;color:#666;word-break:break-all;max-width:400px;margin-top:8px">${esc(url || '')}</div><div class="buttons"><button onclick="reintentar()">↻ REINTENTAR</button><button onclick="cerrarPlayer()">✖ CERRAR</button></div>`;
+  let diagnostico = '';
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch(url, { method: 'GET', signal: ctrl.signal, cache: 'no-store' });
+    clearTimeout(timer);
+    const ct = res.headers.get('content-type') || '(sin ct)';
+    const status = res.status;
+    const size = res.headers.get('content-length') || '?';
+    diagnostico = `\nEstado HTTP: ${status}\nContent-Type: ${ct}\nTamaño: ${size} bytes`;
+    if (status === 404) diagnostico += '\n\n❌ El canal NO EXISTE (404).';
+    else if (status === 403) diagnostico += '\n\n❌ ACCESO DENEGADO (403). Credenciales inválidas.';
+    else if (status === 401) diagnostico += '\n\n❌ AUTENTICACIÓN REQUERIDA (401).';
+    else if (status === 500) diagnostico += '\n\n❌ ERROR SERVIDOR (500). Caído.';
+    else if (status === 200 && ct.includes('text/html')) diagnostico += '\n\n⚠️ Servidor devolvió HTML en vez de video.';
+    else if (status === 200 && ct.includes('application/json')) diagnostico += '\n\n⚠️ Servidor devolvió JSON en vez de video.';
+  } catch (e) {
+    diagnostico = '\n\n⚠️ No se pudo contactar servidor:\n' + e.message + '\n\nProbá 🟣 PROXY CORS.';
+  }
+  const div = document.createElement('div'); 
+  div.className = 'video-error';
+  div.innerHTML = `
+    <div class="icon">📡</div>
+    <div class="msg" style="white-space:pre-wrap">${esc(msg)}</div>
+    <pre style="font-size:0.68em;color:#4a7a4a;background:#000;padding:8px;border-radius:4px;max-width:500px;text-align:left;overflow:auto;margin:8px 0;white-space:pre-wrap;word-break:break-all">${esc(url || '')}${esc(diagnostico)}</pre>
+    <div class="buttons">
+      <button onclick="reintentar()">↻ REINTENTAR</button>
+      <button onclick="toggleConnectionMode();setTimeout(reintentar,500)" style="border-color:#c47aff;color:#c47aff">🟣 PROBAR PROXY</button>
+      <button onclick="cerrarPlayer()">✖ CERRAR</button>
+    </div>
+  `;
   wrap.appendChild(div);
 }
 function reintentar() {
@@ -1946,7 +1979,6 @@ function enviarAlPrincipal() {
   } catch(e) { mostrarToast('Error'); }
 }
 function toggleFavActual() { if (!itemActual) return; const n = toggleFavorito(itemActual); const b = $('btnStarPlayer'); b.textContent = n ? '★' : '☆'; b.classList.toggle('active', n); actualizarBadgeFav(); }
-
 function limpiarPlayer() {
   const video = $('videoEl');
   try { video.pause(); } catch(e){}
@@ -2006,7 +2038,7 @@ document.addEventListener('keydown', (e) => {
   if (el) el.addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
 });
 
-/* ============ BOOT — SOLO PRECARGA, NO AUTO-LOGIN ============ */
+/* ============ BOOT — SOLO PRECARGA ============ */
 window.addEventListener('load', function() {
   setConnectionMode(connectionMode);
   const btnQ = $('btnAutoQuality');
@@ -2014,7 +2046,6 @@ window.addEventListener('load', function() {
     btnQ.classList.toggle('on', autoQualityEnabled);
     btnQ.textContent = autoQualityEnabled ? '⚙ AUTO' : '⚙ MANUAL';
   }
-
   const m3uActive = localStorage.getItem('matrixx_m3u_active') === '1';
   if (m3uActive) {
     try {
@@ -2035,11 +2066,9 @@ window.addEventListener('load', function() {
       }
     } catch(e){}
   }
-
   const srv = localStorage.getItem('ip2_srv') || localStorage.getItem('iptv2_host') || localStorage.getItem('matrixx_srv');
   const usr = localStorage.getItem('ip2_usr') || localStorage.getItem('iptv2_user') || localStorage.getItem('matrixx_usr');
   const pwd = localStorage.getItem('ip2_pwd') || localStorage.getItem('iptv2_pass') || localStorage.getItem('matrixx_pwd');
-
   if (srv && usr && pwd && srv.indexOf('M3U:') !== 0) {
     $('servidor').value = srv;
     $('usuario').value = usr;
