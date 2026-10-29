@@ -1,0 +1,1769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MatrixXtechno IPTV2</title>
+<style>
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+html, body { height: 100%; overflow-x: hidden; }
+body {
+  font-family: 'Courier New', 'Consolas', monospace;
+  background: #000; color: #00ff41; overflow-x: hidden; position: relative;
+}
+#matrixCanvas {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: 0; opacity: 0.25; pointer-events: none;
+}
+:root {
+  --primary: #00ff41;
+  --primary-dark: #00b82e;
+  --primary-glow: rgba(0,255,65,0.5);
+  --bg: #000;
+  --bg-2: #0a0f0a;
+  --bg-3: #0f1a0f;
+  --text: #b8ffb8;
+  --text-dim: #4a7a4a;
+  --danger: #ff0044;
+  --border: #003300;
+  --adult: #ff00aa;
+  --adult-glow: rgba(255,0,170,0.5);
+  --star: #ffd700;
+  --star-glow: rgba(255,215,0,0.6);
+}
+#loginBox {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at center, rgba(0,30,0,0.85) 0%, rgba(0,0,0,0.95) 100%);
+  z-index: 1000; padding: 20px;
+}
+.login-card {
+  background: rgba(0, 15, 0, 0.92); border: 2px solid var(--primary);
+  border-radius: 12px; padding: 32px 24px; width: 100%; max-width: 400px;
+  box-shadow: 0 0 40px var(--primary-glow), inset 0 0 20px rgba(0,255,65,0.05);
+  position: relative; overflow: hidden;
+}
+.login-card::before {
+  content: ''; position: absolute; top: 0; left: -100%;
+  width: 100%; height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  animation: scanLine 3s linear infinite;
+}
+@keyframes scanLine { 0% { left: -100%; } 100% { left: 100%; } }
+.login-card h1 {
+  font-size: 1.4em; text-align: center; margin-bottom: 4px;
+  color: var(--primary); letter-spacing: 3px;
+  text-shadow: 0 0 10px var(--primary), 0 0 20px var(--primary);
+}
+.login-card .subtitle {
+  text-align: center; color: var(--text-dim); font-size: 0.75em;
+  margin-bottom: 24px; letter-spacing: 2px; text-transform: uppercase;
+}
+.field { margin-bottom: 14px; }
+.field label {
+  display: block; font-size: 0.72em; color: var(--primary);
+  margin-bottom: 6px; letter-spacing: 1.5px; text-transform: uppercase;
+}
+.field input {
+  width: 100%; padding: 11px 14px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--bg);
+  color: var(--text); font-size: 0.9em; outline: none; transition: all 0.2s;
+}
+.field input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 10px var(--primary-glow);
+  background: rgba(0,20,0,0.9);
+}
+.remember {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.78em; color: var(--text-dim); margin: 14px 0;
+}
+.remember input { width: auto; accent-color: var(--primary); }
+.btn-primary {
+  width: 100%; padding: 13px; border-radius: 4px; border: 1px solid var(--primary);
+  background: transparent; color: var(--primary); font-weight: 700;
+  font-size: 0.95em; cursor: pointer; letter-spacing: 2px;
+  text-transform: uppercase; transition: all 0.25s;
+}
+.btn-primary:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px var(--primary); }
+.btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+.error-msg {
+  display: none; background: rgba(255,0,68,0.1);
+  border: 1px solid var(--danger); color: var(--danger);
+  padding: 10px; border-radius: 4px; font-size: 0.78em;
+  margin-top: 12px; text-align: center;
+}
+#app { display: none; position: relative; z-index: 1; }
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(0, 10, 0, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--primary);
+  padding: 10px 14px;
+  box-shadow: 0 0 20px rgba(0,255,65,0.15);
+}
+.header-top {
+  display: flex; align-items: center; gap: 8px;
+  max-width: 1400px; margin: 0 auto;
+}
+.logo {
+  color: var(--primary); font-weight: 700; font-size: 0.95em;
+  white-space: nowrap; letter-spacing: 2px;
+  text-shadow: 0 0 8px var(--primary);
+}
+.logo::before { content: '> '; opacity: 0.6; }
+.search-wrap { flex: 1; position: relative; }
+.search-wrap input {
+  width: 100%; padding: 8px 34px 8px 34px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--bg);
+  color: var(--text); font-size: 0.82em; outline: none;
+}
+.search-wrap input:focus { border-color: var(--primary); box-shadow: 0 0 10px var(--primary-glow); }
+.search-wrap::before {
+  content: '⌕'; position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 1.1em; color: var(--primary); font-weight: bold;
+}
+.search-clear {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  width: 22px; height: 22px; border-radius: 50%;
+  background: transparent; border: none; color: var(--text-dim);
+  cursor: pointer; font-size: 0.9em; display: none;
+}
+.search-clear:hover { color: var(--primary); }
+.search-clear.show { display: flex; align-items: center; justify-content: center; }
+.btn-icon {
+  padding: 8px 11px; border-radius: 4px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text); cursor: pointer; font-size: 0.82em;
+  transition: all 0.2s; position: relative;
+}
+.btn-icon:hover {
+  border-color: var(--primary); color: var(--primary);
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+.btn-icon.danger:hover { border-color: var(--danger); color: var(--danger); }
+.btn-icon.adult { border-color: rgba(255,0,170,0.4); color: var(--adult); }
+.btn-icon.adult:hover {
+  background: var(--adult); color: #000; border-color: var(--adult);
+  box-shadow: 0 0 12px var(--adult-glow);
+}
+.btn-icon.fav-btn { border-color: rgba(255,215,0,0.4); color: var(--star); }
+.btn-icon.fav-btn:hover {
+  background: var(--star); color: #000; border-color: var(--star);
+  box-shadow: 0 0 12px var(--star-glow);
+}
+.fav-badge {
+  position: absolute; top: -4px; right: -4px;
+  background: var(--star); color: #000;
+  font-size: 0.65em; font-weight: 700;
+  padding: 1px 5px; border-radius: 8px; min-width: 16px; text-align: center;
+}
+.main-tabs {
+  display: flex; gap: 6px; margin: 10px auto 0;
+  max-width: 1400px; padding: 0 14px;
+  overflow-x: auto; scrollbar-width: none;
+}
+.main-tabs::-webkit-scrollbar { display: none; }
+.mtab {
+  padding: 8px 16px; border-radius: 4px; cursor: pointer;
+  white-space: nowrap; background: transparent;
+  color: var(--text-dim); font-weight: 600; font-size: 0.78em;
+  border: 1px solid var(--border);
+  transition: all 0.2s; letter-spacing: 1px; text-transform: uppercase;
+}
+.mtab.active {
+  background: var(--primary); color: #000;
+  border-color: var(--primary); box-shadow: 0 0 12px var(--primary-glow);
+}
+.mtab:hover:not(.active) { border-color: var(--primary); color: var(--primary); }
+.mtab.adult.active {
+  background: var(--adult); color: #fff; border-color: var(--adult);
+  box-shadow: 0 0 12px var(--adult-glow);
+}
+.mtab.fav.active {
+  background: var(--star); color: #000; border-color: var(--star);
+  box-shadow: 0 0 12px var(--star-glow);
+}
+.mtab .count {
+  display: inline-block; margin-left: 6px; padding: 1px 6px;
+  border-radius: 8px; background: rgba(0,0,0,0.3); font-size: 0.78em;
+}
+.mtab.active .count { background: rgba(0,0,0,0.2); }
+.sub-bar {
+  max-width: 1400px; margin: 0 auto;
+  padding: 10px 14px 0;
+  display: flex; gap: 6px; flex-wrap: nowrap;
+  overflow-x: auto; scrollbar-width: none;
+}
+.sub-bar::-webkit-scrollbar { display: none; }
+.chip {
+  padding: 6px 12px; border-radius: 20px;
+  background: rgba(0,20,0,0.7); border: 1px solid var(--border);
+  color: var(--text-dim); cursor: pointer; white-space: nowrap;
+  font-size: 0.75em; font-weight: 600; transition: all 0.2s;
+}
+.chip:hover { border-color: var(--primary); color: var(--primary); }
+.chip.active {
+  background: var(--primary); color: #000; border-color: var(--primary);
+  box-shadow: 0 0 8px var(--primary-glow);
+}
+.chip.adult { border-color: rgba(255,0,170,0.3); }
+.chip.adult.active { background: var(--adult); color: #fff; border-color: var(--adult); }
+.chip.fav { background: rgba(255,215,0,0.1); color: var(--star); border-color: rgba(255,215,0,0.4); }
+.chip.fav.active { background: var(--star); color: #000; border-color: var(--star); }
+.chip .c-count {
+  display: inline-block; margin-left: 5px; padding: 0 5px;
+  border-radius: 6px; background: rgba(0,0,0,0.3); font-size: 0.85em;
+}
+.section-header {
+  max-width: 1400px; margin: 16px auto 8px;
+  padding: 0 14px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.section-title {
+  color: var(--primary); font-weight: 700; font-size: 0.95em;
+  letter-spacing: 1px; text-transform: uppercase;
+  text-shadow: 0 0 8px var(--primary-glow);
+}
+.section-title::before { content: '◆ '; opacity: 0.6; }
+.section-badge {
+  padding: 3px 10px; border-radius: 10px;
+  background: rgba(0,255,65,0.1); border: 1px solid var(--border);
+  color: var(--primary); font-size: 0.72em; font-weight: 600;
+}
+.content { max-width: 1400px; margin: 0 auto; padding: 0 14px 40px; }
+#info {
+  text-align: center; color: var(--text-dim);
+  font-size: 0.75em; padding: 8px; letter-spacing: 1px;
+}
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(135px, 1fr));
+  gap: 10px;
+}
+.card {
+  background: rgba(0, 15, 0, 0.85);
+  border: 1px solid var(--border);
+  border-radius: 6px; overflow: hidden; cursor: pointer;
+  transition: all 0.25s;
+  display: flex; flex-direction: column;
+  position: relative;
+}
+.card:hover {
+  transform: translateY(-3px);
+  border-color: var(--primary);
+  box-shadow: 0 0 20px var(--primary-glow), inset 0 0 10px rgba(0,255,65,0.1);
+}
+.card.adult { border-color: rgba(255,0,170,0.3); }
+.card.adult:hover { border-color: var(--adult); box-shadow: 0 0 20px var(--adult-glow); }
+.card.is-fav { border-color: var(--star); box-shadow: 0 0 12px rgba(255,215,0,0.4); }
+.card-img {
+  width: 100%; aspect-ratio: 4/3; background: #000;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+.card-img img { width: 100%; height: 100%; object-fit: contain; }
+.card-img .placeholder {
+  font-size: 1.8em; color: var(--primary); opacity: 0.4; font-weight: 700;
+}
+.card.adult .card-img .placeholder { color: var(--adult); }
+.star-btn {
+  position: absolute; top: 4px; right: 4px;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,0,0,0.75); border: 1px solid var(--border);
+  color: var(--text-dim); font-size: 0.95em; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; z-index: 5;
+}
+.star-btn:hover {
+  background: rgba(0,0,0,0.95); border-color: var(--star); color: var(--star);
+  transform: scale(1.1);
+}
+.star-btn.active {
+  background: var(--star); border-color: var(--star); color: #000;
+  box-shadow: 0 0 10px var(--star-glow);
+}
+.card-body { padding: 7px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.card-title {
+  font-size: 0.72em; font-weight: 600; color: var(--text); line-height: 1.3;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; word-break: break-word;
+}
+.card-badges { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+.badge {
+  font-size: 0.64em; padding: 2px 5px; border-radius: 3px;
+  background: var(--primary); color: #000; font-weight: 700;
+}
+.badge.rating { background: #ffb800; }
+.badge.catchup { background: #7b2fff; color: #fff; }
+.badge.adult { background: var(--adult); color: #fff; }
+.badge.country { background: rgba(0,255,65,0.15); color: var(--primary); border: 1px solid var(--border); }
+.loader {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; padding: 60px 20px; gap: 16px;
+}
+.spinner {
+  width: 44px; height: 44px;
+  border: 3px solid rgba(0,255,65,0.15);
+  border-top-color: var(--primary); border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loader-text { color: var(--text-dim); font-size: 0.82em; letter-spacing: 1px; }
+#progressBar {
+  width: 240px; height: 3px; background: var(--bg-3);
+  border-radius: 2px; overflow: hidden; margin-top: 8px;
+}
+#progressBar div {
+  height: 100%; background: var(--primary); width: 0%;
+  transition: width 0.3s; box-shadow: 0 0 8px var(--primary);
+}
+#playerModal {
+  display: none; position: fixed; inset: 0; background: #000;
+  z-index: 2000; flex-direction: column;
+}
+#playerModal.active { display: flex; }
+.player-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; background: var(--bg-2);
+  border-bottom: 1px solid var(--primary);
+  box-shadow: 0 0 15px var(--primary-glow);
+}
+.player-title {
+  flex: 1; font-size: 0.85em; font-weight: 600; color: var(--primary);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  letter-spacing: 1px;
+}
+.btn-star-player {
+  padding: 8px 12px; border-radius: 4px;
+  border: 1px solid var(--star); background: transparent;
+  color: var(--star); font-weight: 700; cursor: pointer;
+  font-size: 0.82em; transition: all 0.2s;
+}
+.btn-star-player:hover { background: var(--star); color: #000; box-shadow: 0 0 12px var(--star-glow); }
+.btn-star-player.active { background: var(--star); color: #000; box-shadow: 0 0 15px var(--star-glow); }
+.btn-retry {
+  padding: 8px 12px; border-radius: 4px;
+  border: 1px solid #ffaa00; background: transparent;
+  color: #ffaa00; font-weight: 700; cursor: pointer;
+  font-size: 0.82em; transition: all 0.2s;
+}
+.btn-retry:hover { background: #ffaa00; color: #000; }
+.btn-close {
+  padding: 8px 14px; border-radius: 4px; border: 1px solid var(--danger);
+  background: transparent; color: var(--danger); font-weight: 700;
+  cursor: pointer; font-size: 0.78em; transition: all 0.2s;
+  letter-spacing: 1px;
+}
+.btn-close:hover { background: var(--danger); color: #fff; box-shadow: 0 0 12px rgba(255,0,68,0.6); }
+.video-wrap {
+  flex: 1; display: flex; align-items: center;
+  justify-content: center; background: #000; position: relative;
+  min-height: 0;
+}
+.video-wrap video { width: 100%; height: 100%; object-fit: contain; background: #000; }
+.video-spinner {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 50px; height: 50px;
+  border: 3px solid rgba(0,255,65,0.15);
+  border-top-color: var(--primary); border-radius: 50%;
+  animation: spin 0.8s linear infinite; z-index: 10;
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+.video-status {
+  position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%);
+  background: rgba(0,20,0,0.92); border: 1px solid var(--primary);
+  color: var(--primary); padding: 8px 16px; border-radius: 6px;
+  font-size: 0.78em; z-index: 11; max-width: 90%; text-align: center;
+  box-shadow: 0 0 12px var(--primary-glow);
+}
+.video-status.error { border-color: var(--danger); color: var(--danger); box-shadow: 0 0 12px rgba(255,0,68,0.5); }
+.video-error {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 16px; padding: 24px;
+  background: rgba(0,0,0,0.95); text-align: center; z-index: 20;
+}
+.video-error .icon { font-size: 3em; }
+.video-error .msg { color: var(--text-dim); font-size: 0.85em; max-width: 400px; line-height: 1.5; }
+.video-error .detalles {
+  font-size: 0.72em; color: #666; max-width: 500px; word-break: break-all;
+  background: rgba(0,0,0,0.5); padding: 8px; border-radius: 4px;
+  border: 1px solid #333; margin-top: 8px;
+}
+.video-error .buttons { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.video-error button {
+  padding: 10px 20px; border-radius: 4px; border: 1px solid var(--primary);
+  background: transparent; color: var(--primary); font-weight: 700;
+  cursor: pointer; letter-spacing: 1px; transition: all 0.2s; font-size: 0.85em;
+}
+.video-error button:hover { background: var(--primary); color: #000; box-shadow: 0 0 15px var(--primary); }
+.video-error button.secondary { border-color: var(--text-dim); color: var(--text-dim); }
+.video-error button.secondary:hover { background: var(--text-dim); color: #000; }
+.player-controls {
+  display: flex; gap: 6px; padding: 10px 16px;
+  background: var(--bg-2); border-top: 1px solid var(--primary);
+  overflow-x: auto; scrollbar-width: none;
+}
+.player-controls::-webkit-scrollbar { display: none; }
+.player-controls button {
+  flex-shrink: 0; padding: 8px 14px; border-radius: 4px;
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text); font-weight: 600; cursor: pointer;
+  font-size: 0.78em; transition: all 0.2s; letter-spacing: 1px;
+}
+.player-controls button:hover { border-color: var(--primary); color: var(--primary); box-shadow: 0 0 8px var(--primary-glow); }
+#episodesModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.92); z-index: 1500;
+  padding: 16px; overflow-y: auto;
+}
+#episodesModal.active { display: block; }
+.episodes-panel {
+  max-width: 800px; margin: 0 auto;
+  background: rgba(0, 15, 0, 0.95);
+  border: 1px solid var(--primary);
+  border-radius: 8px; overflow: hidden;
+  box-shadow: 0 0 30px var(--primary-glow);
+}
+.episodes-header {
+  display: flex; align-items: center; gap: 12px; padding: 16px;
+  background: var(--bg-3); border-bottom: 1px solid var(--primary);
+}
+.episodes-title {
+  flex: 1; font-weight: 700; color: var(--primary);
+  font-size: 0.92em; letter-spacing: 1px;
+}
+.season-group { padding: 14px; }
+.season-title {
+  color: var(--primary); font-weight: 700; font-size: 0.78em;
+  margin-bottom: 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--border); letter-spacing: 1px;
+}
+.episodes-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.episode-item {
+  padding: 11px; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 4px;
+  cursor: pointer; transition: all 0.2s;
+}
+.episode-item:hover {
+  border-color: var(--primary); background: rgba(0,20,0,0.9);
+  box-shadow: 0 0 10px var(--primary-glow);
+}
+.episode-num { color: var(--primary); font-weight: 700; font-size: 0.72em; }
+.episode-title { color: var(--text); font-size: 0.76em; margin-top: 4px; line-height: 1.3; }
+#pinModal {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.95); z-index: 3000;
+  align-items: center; justify-content: center; padding: 20px;
+}
+#pinModal.active { display: flex; }
+.pin-card {
+  background: rgba(20, 0, 10, 0.95);
+  border: 2px solid var(--adult);
+  border-radius: 12px; padding: 28px 22px;
+  width: 100%; max-width: 340px; text-align: center;
+  box-shadow: 0 0 40px var(--adult-glow);
+}
+.pin-card h2 {
+  color: var(--adult); font-size: 1.2em; margin-bottom: 8px;
+  letter-spacing: 3px; text-transform: uppercase;
+  text-shadow: 0 0 15px var(--adult);
+}
+.pin-card p { color: #ff66cc; font-size: 0.75em; margin-bottom: 20px; letter-spacing: 1px; }
+.pin-input {
+  width: 100%; padding: 14px; border-radius: 8px;
+  border: 2px solid var(--adult); background: #000;
+  color: var(--adult); font-size: 1.8em; text-align: center;
+  letter-spacing: 18px; outline: none; font-weight: 700;
+}
+.pin-input:focus { box-shadow: 0 0 20px var(--adult-glow); }
+.pin-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-top: 14px; }
+.pin-key {
+  padding: 12px; border-radius: 6px;
+  border: 1px solid var(--adult); background: transparent;
+  color: var(--adult); font-size: 1.2em; font-weight: 700;
+  cursor: pointer; transition: all 0.15s;
+}
+.pin-key:hover { background: var(--adult); color: #000; box-shadow: 0 0 12px var(--adult-glow); }
+.pin-key:active { transform: scale(0.95); }
+.pin-key.del { color: #ff6666; border-color: #ff6666; }
+.pin-key.del:hover { background: #ff6666; color: #000; }
+.pin-key.ok {
+  grid-column: span 3; background: var(--adult); color: #000;
+  border-color: var(--adult); font-size: 0.85em; letter-spacing: 3px;
+}
+.pin-error { color: var(--danger); font-size: 0.78em; margin-top: 10px; display: none; }
+#toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(100px);
+  background: rgba(0, 20, 0, 0.97); border: 1px solid var(--star);
+  color: var(--star); padding: 12px 22px; border-radius: 6px;
+  font-size: 0.85em; font-weight: 600; z-index: 5000;
+  box-shadow: 0 0 20px var(--star-glow);
+  opacity: 0; transition: all 0.3s; pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.empty { text-align: center; padding: 60px 20px; color: var(--text-dim); }
+.empty .icon { font-size: 3em; margin-bottom: 12px; opacity: 0.5; }
+@media (max-width: 600px) {
+  .grid { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 7px; }
+  .card-title { font-size: 0.66em; }
+  .logo { font-size: 0.8em; }
+  .btn-icon { padding: 8px 9px; font-size: 0.78em; }
+  .mtab { padding: 7px 12px; font-size: 0.72em; }
+  .chip { padding: 5px 10px; font-size: 0.7em; }
+  .login-card { padding: 24px 18px; }
+  .star-btn { width: 24px; height: 24px; font-size: 0.85em; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="matrixCanvas"></canvas>
+
+<div id="loginBox">
+  <div class="login-card">
+    <h1>🟢 MATRIXXTECHNO</h1>
+    <p class="subtitle">Universal IPTV Player</p>
+    <div class="field">
+      <label>Servidor</label>
+      <input type="text" id="servidor" placeholder="http://servidor.com:8080" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Usuario</label>
+      <input type="text" id="usuario" placeholder="Tu usuario" autocomplete="off">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="senha" placeholder="Tu contraseña">
+    </div>
+    <label class="remember">
+      <input type="checkbox" id="lembrar" checked> Recordar credenciales
+    </label>
+    <button class="btn-primary" id="btnLogin" onclick="login()">▶ ACCEDER</button>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header>
+    <div class="header-top">
+      <div class="logo">MATRIXXTECHNO</div>
+      <div class="search-wrap">
+        <input type="text" id="busca" placeholder="Buscar..." oninput="onBuscaInput()">
+        <button class="search-clear" id="searchClear" onclick="limpiarBusca()">✖</button>
+      </div>
+      <button class="btn-icon fav-btn" onclick="cambiarTab('fav')" title="Favoritos">
+        ⭐<span class="fav-badge" id="favBadge" style="display:none;">0</span>
+      </button>
+      <button class="btn-icon adult" onclick="pedirPinAdulto()" title="Adultos">🔞</button>
+      <button class="btn-icon" onclick="recargar()" title="Recargar">↻</button>
+      <button class="btn-icon danger" onclick="logout()" title="Salir">⏻</button>
+    </div>
+    <div class="main-tabs" id="mainTabs">
+      <div class="mtab active" data-tab="live" onclick="cambiarTab('live')">📺 Live <span class="count" id="countLive">0</span></div>
+      <div class="mtab" data-tab="vod" onclick="cambiarTab('vod')">🎬 Películas <span class="count" id="countVod">0</span></div>
+      <div class="mtab" data-tab="series" onclick="cambiarTab('series')">📼 Series <span class="count" id="countSeries">0</span></div>
+      <div class="mtab fav" data-tab="fav" onclick="cambiarTab('fav')">⭐ Favoritos <span class="count" id="countFav">0</span></div>
+    </div>
+  </header>
+
+  <div class="sub-bar" id="subBar"></div>
+
+  <div class="section-header" id="sectionHeader" style="display:none;">
+    <div class="section-title" id="sectionTitle"></div>
+    <div class="section-badge" id="sectionBadge"></div>
+  </div>
+
+  <div class="content">
+    <div id="info"></div>
+    <div id="loader" class="loader" style="display:none;">
+      <div class="spinner"></div>
+      <div class="loader-text" id="loaderText">Cargando...</div>
+      <div id="progressBar"><div></div></div>
+    </div>
+    <div id="grid" class="grid"></div>
+    <div id="empty" class="empty" style="display:none;">
+      <div class="icon">📭</div>
+      <div id="emptyText">No hay resultados</div>
+    </div>
+  </div>
+</div>
+
+<div id="playerModal">
+  <div class="player-header">
+    <div class="player-title" id="playerTitulo">Reproduciendo</div>
+    <button class="btn-retry" onclick="reintentar()" title="Reintentar">↻</button>
+    <button class="btn-star-player" id="btnStarPlayer" onclick="toggleFavActual()">☆</button>
+    <button class="btn-close" onclick="cerrarPlayer()">✖</button>
+  </div>
+  <div class="video-wrap" id="videoWrap">
+    <video id="videoEl" controls autoplay playsinline crossorigin="anonymous"></video>
+  </div>
+  <div class="player-controls">
+    <button onclick="togglePlay()">▶/⏸</button>
+    <button onclick="stopVideo()">⏹ Stop</button>
+    <button onclick="toggleFullscreen()">⛶ Pantalla</button>
+    <button onclick="toggleMute()">🔊 Mute</button>
+    <button onclick="subirVolumen()">🔊 +</button>
+    <button onclick="bajarVolumen()">🔉 −</button>
+  </div>
+</div>
+
+<div id="episodesModal">
+  <div class="episodes-panel">
+    <div class="episodes-header">
+      <div class="episodes-title" id="episodesTitulo"></div>
+      <button class="btn-close" onclick="cerrarEpisodios()">✖</button>
+    </div>
+    <div id="episodesBody"></div>
+  </div>
+</div>
+
+<div id="pinModal">
+  <div class="pin-card">
+    <h2>🔞 ADULTOS</h2>
+    <p>Introduce el PIN de 4 dígitos</p>
+    <input type="password" id="pinInput" class="pin-input" maxlength="4" placeholder="••••" inputmode="numeric" readonly>
+    <div class="pin-buttons">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+      <button class="pin-key" onclick="pinPress('0')">0</button>
+      <button class="pin-key del" onclick="cerrarPin()">✖</button>
+      <button class="pin-key ok" onclick="verificarPin()">VERIFICAR</button>
+    </div>
+    <div class="pin-error" id="pinError">❌ PIN incorrecto</div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.15/dist/hls.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dashjs@4.7.4/dist/dash.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mpegts.js@1.7.3/dist/mpegts.all.min.js"></script>
+
+<script>
+(function() {
+  const canvas = document.getElementById('matrixCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let columns = [];
+  const fontSize = 14;
+  const chars = 'アカサタナハマヤラワガザダバパイキシチニヒミリヰギジヂビピウクスツヌフムユルグズヅブプエケセテネヘメレヱゲゼデベペオコソトノホモヨロヲゴゾドボポヴ0123456789ABCDEF'.split('');
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    columns = Array(Math.floor(canvas.width / fontSize)).fill(1);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  function draw() {
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#00ff41';
+    ctx.font = fontSize + 'px monospace';
+    for (let i = 0; i < columns.length; i++) {
+      ctx.fillText(chars[Math.floor(Math.random() * chars.length)], i * fontSize, columns[i] * fontSize);
+      if (columns[i] * fontSize > canvas.height && Math.random() > 0.975) columns[i] = 0;
+      columns[i]++;
+    }
+  }
+  setInterval(draw, 50);
+})();
+
+const DEFAULT_SERVER = 'http://latinostvhd.club:8080';
+const DEFAULT_USER   = 'Jannylethbarroso';
+const DEFAULT_PASS   = 'fcca30a174';
+const ADULT_PIN      = '0000';
+const LOTE = 60;
+const CACHE_KEY = 'matrixx_cat_v4';
+const FAV_KEY   = 'matrixx_favs_v1';
+const CACHE_TTL = 15 * 60 * 1000;
+
+let servidor = '', usuario = '', senha = '';
+let tabActual = 'live';
+let categoriaActual = '__ALL__';
+let datos = { live: [], vod: [], series: [], adult: [] };
+let categorias = { live: [], vod: [], series: [], adult: [] };
+let filtrados = [];
+let renderizados = 0;
+let cargando = false;
+let urlActual = '';
+let itemActual = null;
+let hlsInstance = null;
+let dashInstance = null;
+let mpegtsPlayer = null;
+let observer = null;
+let episodiosCache = {};
+let adultUnlocked = false;
+let pinBuffer = '';
+let favoritos = {};
+let busquedaTimeout = null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const normServidor = s => {
+  s = (s || '').trim().replace(/\/+$/, '');
+  return /^https?:\/\//i.test(s) ? s : 'http://' + s;
+};
+
+function favStorageKey() { return FAV_KEY + '_' + (usuario || 'anon'); }
+
+function cargarFavoritos() {
+  try {
+    const raw = localStorage.getItem(favStorageKey());
+    favoritos = raw ? JSON.parse(raw) : {};
+  } catch (e) { favoritos = {}; }
+  actualizarBadgeFav();
+}
+
+function guardarFavoritos() {
+  try { localStorage.setItem(favStorageKey(), JSON.stringify(favoritos)); }
+  catch (e) { console.warn('No se pudo guardar favoritos:', e); }
+  actualizarBadgeFav();
+}
+
+function actualizarBadgeFav() {
+  const n = Object.keys(favoritos).length;
+  const badge = $('favBadge');
+  if (badge) {
+    if (n > 0) { badge.style.display = 'inline-block'; badge.textContent = n; }
+    else badge.style.display = 'none';
+  }
+  const cnt = $('countFav');
+  if (cnt) cnt.textContent = n;
+}
+
+function itemUID(item) {
+  const tipo = item._tipo || tabActual;
+  const id = item.stream_id || item.series_id || item.id || item.name;
+  return `${tipo}_${id}`;
+}
+
+function esFavorito(item) { return !!favoritos[itemUID(item)]; }
+
+function toggleFavorito(item) {
+  const uid = itemUID(item);
+  if (favoritos[uid]) {
+    delete favoritos[uid];
+    mostrarToast('☆ Eliminado de favoritos');
+    guardarFavoritos();
+    return false;
+  } else {
+    favoritos[uid] = {
+      _tipo: item._tipo || tabActual,
+      stream_id: item.stream_id, series_id: item.series_id, id: item.id,
+      name: item.name,
+      stream_icon: item.stream_icon || item.cover || item.movie_image || '',
+      rating: item.rating, container_extension: item.container_extension,
+      category_name: item.category_name, tv_archive: item.tv_archive
+    };
+    mostrarToast('⭐ Añadido a favoritos');
+    guardarFavoritos();
+    return true;
+  }
+}
+
+function mostrarToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+const PAISES = [
+  { code: 'BR', flag: '🇧🇷', name: 'Brasil', kw: ['brasil','brazil','br ','br:','pt-br','globo','sbt','record','band','sportv','premiere','combate','bbb','brasileir'] },
+  { code: 'AR', flag: '🇦🇷', name: 'Argentina', kw: ['argentina','arg ','tyc','eltrece','telefe'] },
+  { code: 'MX', flag: '🇲🇽', name: 'México', kw: ['mexico','méxico','mex ','televisa','azteca'] },
+  { code: 'ES', flag: '🇪🇸', name: 'España', kw: ['españa','espana','spain','esp ','movistar','laliga','rtve','antena 3','telecinco'] },
+  { code: 'US', flag: '🇺🇸', name: 'USA', kw: ['usa','us ','united states','univision','telemundo','espn','nba','nfl','mlb','hbo','showtime','fox','abc','cbs','nbc','discovery'] },
+  { code: 'CL', flag: '🇨🇱', name: 'Chile', kw: ['chile','chv','mega','canal 13'] },
+  { code: 'CO', flag: '🇨🇴', name: 'Colombia', kw: ['colombia','caracol','rcn'] },
+  { code: 'PE', flag: '🇵🇪', name: 'Perú', kw: ['peru','perú','america tv peru','panamericana'] },
+  { code: 'VE', flag: '🇻🇪', name: 'Venezuela', kw: ['venezuela','ven ','vtv'] },
+  { code: 'UY', flag: '🇺🇾', name: 'Uruguay', kw: ['uruguay','uru '] },
+  { code: 'PY', flag: '🇵🇾', name: 'Paraguay', kw: ['paraguay','par ','telefuturo','snt','latele'] },
+  { code: 'EC', flag: '🇪🇨', name: 'Ecuador', kw: ['ecuador','ecu '] },
+  { code: 'BO', flag: '🇧🇴', name: 'Bolivia', kw: ['bolivia','bol '] },
+  { code: 'CR', flag: '🇨🇷', name: 'Costa Rica', kw: ['costa rica','cri '] },
+  { code: 'GT', flag: '🇬🇹', name: 'Guatemala', kw: ['guatemala','gua '] },
+  { code: 'HN', flag: '🇭🇳', name: 'Honduras', kw: ['honduras','hon '] },
+  { code: 'SV', flag: '🇸🇻', name: 'El Salvador', kw: ['salvador','slv '] },
+  { code: 'NI', flag: '🇳🇮', name: 'Nicaragua', kw: ['nicaragua','nic '] },
+  { code: 'PA', flag: '🇵🇦', name: 'Panamá', kw: ['panama','panamá','pan '] },
+  { code: 'DO', flag: '🇩🇴', name: 'Rep. Dominicana', kw: ['dominicana','dom '] },
+  { code: 'PR', flag: '🇵🇷', name: 'Puerto Rico', kw: ['puerto rico','pur ','wapa'] },
+  { code: 'CU', flag: '🇨🇺', name: 'Cuba', kw: ['cuba','cub '] },
+  { code: 'PT', flag: '🇵🇹', name: 'Portugal', kw: ['portugal','por ','rtp','sic','tvi'] },
+  { code: 'IT', flag: '🇮🇹', name: 'Italia', kw: ['italia','italy','ita ','rai','mediaset'] },
+  { code: 'FR', flag: '🇫🇷', name: 'Francia', kw: ['france','francia','fra ','tf1'] },
+  { code: 'DE', flag: '🇩🇪', name: 'Alemania', kw: ['alemania','germany','deu ','ard','zdf'] },
+  { code: 'GB', flag: '🇬🇧', name: 'Reino Unido', kw: ['united kingdom','inglaterra','england','gbr ','uk ','bbc','itv'] },
+  { code: 'CA', flag: '🇨🇦', name: 'Canadá', kw: ['canada','canadá','can ','tsn','ctv'] },
+  { code: 'JP', flag: '🇯🇵', name: 'Japón', kw: ['japon','japón','japan','jpn '] },
+  { code: 'KR', flag: '🇰🇷', name: 'Corea', kw: ['corea','korea','kor '] },
+  { code: 'CN', flag: '🇨🇳', name: 'China', kw: ['china','chn ','cctv'] },
+  { code: 'IN', flag: '🇮🇳', name: 'India', kw: ['india','ind ','star plus','zee tv'] },
+  { code: 'TR', flag: '🇹🇷', name: 'Turquía', kw: ['turquia','turquía','turkey','tur ','trt'] },
+  { code: 'RU', flag: '🇷🇺', name: 'Rusia', kw: ['rusia','russia','rus ','rt '] },
+  { code: 'PL', flag: '🇵🇱', name: 'Polonia', kw: ['polonia','poland','pol '] },
+  { code: 'NL', flag: '🇳🇱', name: 'Países Bajos', kw: ['holanda','netherlands','nld '] },
+  { code: 'BE', flag: '🇧🇪', name: 'Bélgica', kw: ['belgica','bélgica','belgium','bel '] },
+  { code: 'CH', flag: '🇨🇭', name: 'Suiza', kw: ['suiza','switzerland','che '] },
+  { code: 'SE', flag: '🇸🇪', name: 'Suecia', kw: ['suecia','sweden','swe '] },
+  { code: 'NO', flag: '🇳🇴', name: 'Noruega', kw: ['noruega','norway','nor '] },
+  { code: 'DK', flag: '🇩🇰', name: 'Dinamarca', kw: ['dinamarca','denmark','dnk '] },
+  { code: 'AU', flag: '🇦🇺', name: 'Australia', kw: ['australia','aus '] },
+  { code: 'NZ', flag: '🇳🇿', name: 'Nueva Zelanda', kw: ['nueva zelanda','new zealand','nzl '] },
+  { code: 'ZA', flag: '🇿🇦', name: 'Sudáfrica', kw: ['sudafrica','south africa','zaf '] },
+  { code: 'EG', flag: '🇪🇬', name: 'Egipto', kw: ['egipto','egypt','egy '] },
+  { code: 'MA', flag: '🇲🇦', name: 'Marruecos', kw: ['marruecos','morocco','mar '] },
+  { code: 'ARAB', flag: '🌍', name: 'Árabe', kw: ['arab','arabe','árabe','mbc','al jazeera'] },
+  { code: 'LAT', flag: '🌎', name: 'Latinoamérica', kw: ['latinoamerica','latinoamérica','latino','lat '] },
+  { code: '24/7', flag: '🎬', name: '24/7', kw: ['24/7','24-7','24h','24 horas'] },
+  { code: 'VIP', flag: '💎', name: 'VIP / Premium', kw: ['vip','premium','premiun','pro '] }
+];
+
+function detectarPais(item) {
+  const texto = ((item.name || '') + ' ' + (item.category_name || '') + ' ' + (item.group || '')).toLowerCase();
+  for (const p of PAISES) {
+    if (p.kw.some(k => texto.includes(k))) return p;
+  }
+  return null;
+}
+
+function detectarCategoria(item) {
+  const texto = ((item.name || '') + ' ' + (item.category_name || '') + ' ' + (item.group || '')).toLowerCase();
+  const cats = [
+    { key: 'DEPORTES', icon: '⚽', kw: ['sport','deporte','esporte','espn','fox sports','tyc','premiere','combate','nba','nfl','mlb','ufc','f1','dazn','tnt sports','bein','gol'] },
+    { key: 'NOTICIAS', icon: '📰', kw: ['news','noticia','notícia','cnn','fox news','bbc news','euronews'] },
+    { key: 'PELÍCULAS', icon: '🎬', kw: ['cinema','movie','película','pelicula','cine','film','hbo','starz','showtime','amc','tnt','cinemax','space','syfy','star channel','fx'] },
+    { key: 'INFANTIL', icon: '🧸', kw: ['kids','infantil','niño','niños','cartoon','discovery kids','disney','nickelodeon','nick','boomerang','baby tv','tooncast'] },
+    { key: 'MÚSICA', icon: '🎵', kw: ['music','música','musica','mtv','vh1','telehit','muchmusic','trace'] },
+    { key: 'DOCUMENTALES', icon: '📚', kw: ['docu','documental','discovery','history','nat geo','natgeo','animal planet','investigation'] },
+    { key: 'ENTRETENIMIENTO', icon: '🎭', kw: ['entretenimiento','entertainment','comedy','e!','bravo','tlc','lifetime','a&e'] },
+    { key: 'RELIGIOSO', icon: '⛪', kw: ['religio','religión','cristiano','catholic','ewtn','enlace','daystar'] },
+    { key: 'ADULTOS', icon: '🔞', kw: ['adult','xxx','porn','sex','erotic','brazzers','playboy'] }
+  ];
+  for (const c of cats) {
+    if (c.kw.some(k => texto.includes(k))) return c;
+  }
+  if (item.category_name) return { key: item.category_name, icon: '📺' };
+  return { key: 'OTROS', icon: '📡' };
+}
+
+async function login() {
+  const srv = normServidor($('servidor').value);
+  const usr = $('usuario').value.trim();
+  const pwd = $('senha').value.trim();
+  const rec = $('lembrar').checked;
+
+  $('errorMsg').style.display = 'none';
+  if (!srv || !usr || !pwd) { mostrarError('Completa todos los campos'); return; }
+
+  const btn = $('btnLogin');
+  btn.disabled = true;
+  btn.textContent = '⏳ Verificando...';
+
+  try {
+    const apiUrl = `${srv}/player_api.php?username=${encodeURIComponent(usr)}&password=${encodeURIComponent(pwd)}`;
+    const res = await fetch(apiUrl, { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    if (!data.user_info) throw new Error('Respuesta inválida');
+    if (data.user_info.status !== 'Active') throw new Error('Cuenta inactiva o expirada');
+
+    servidor = srv; usuario = usr; senha = pwd;
+    cargarFavoritos();
+
+    if (rec) {
+      localStorage.setItem('matrixx_srv', srv);
+      localStorage.setItem('matrixx_usr', usr);
+      localStorage.setItem('matrixx_pwd', pwd);
+    }
+
+    $('loginBox').style.display = 'none';
+    $('app').style.display = 'block';
+    await cargarTodo();
+  } catch (e) {
+    console.error('Login:', e);
+    mostrarError(e.message === 'Failed to fetch'
+      ? 'No se pudo conectar. Verifica URL o CORS.'
+      : e.message);
+    btn.disabled = false;
+    btn.textContent = '▶ ACCEDER';
+  }
+}
+
+function mostrarError(msg) {
+  const e = $('errorMsg');
+  e.textContent = msg;
+  e.style.display = 'block';
+}
+
+function logout() {
+  if (hlsInstance) { try { hlsInstance.destroy(); } catch(e){} hlsInstance = null; }
+  if (dashInstance) { try { dashInstance.reset(); } catch(e){} dashInstance = null; }
+  if (mpegtsPlayer) { try { mpegtsPlayer.destroy(); } catch(e){} mpegtsPlayer = null; }
+  localStorage.removeItem('matrixx_srv');
+  localStorage.removeItem('matrixx_usr');
+  localStorage.removeItem('matrixx_pwd');
+  sessionStorage.removeItem(CACHE_KEY);
+  location.reload();
+}
+
+function esAdulto(item) {
+  const texto = ((item.name || '') + ' ' + (item.category_name || '')).toLowerCase();
+  const kw = ['adult','xxx','porn','sex','erotic','erótico','brazzers','playboy','penthouse','hustler','private','onlyfans','venus','dorcel','bangbros','milf','anal','hentai','sexy','18+','hot'];
+  return kw.some(p => texto.includes(p));
+}
+
+async function cargarTodo(force = false) {
+  if (cargando) return;
+  cargando = true;
+
+  if (!force) {
+    const cached = sessionStorage.getItem(CACHE_KEY);
+    if (cached) {
+      try {
+        const obj = JSON.parse(cached);
+        if (obj.ts && Date.now() - obj.ts < CACHE_TTL && obj.srv === servidor) {
+          datos = obj.datos;
+          categorias = obj.categorias;
+          finalizarCarga();
+          return;
+        }
+      } catch(e){}
+    }
+  }
+
+  $('loader').style.display = 'flex';
+  $('loaderText').textContent = 'Cargando catálogo...';
+  $('grid').innerHTML = '';
+  $('empty').style.display = 'none';
+  $('progressBar').firstElementChild.style.width = '5%';
+
+  const base = `${servidor}/player_api.php?username=${encodeURIComponent(usuario)}&password=${encodeURIComponent(senha)}`;
+
+  try {
+    const [live, vod, series] = await Promise.all([
+      fetchJSON(`${base}&action=get_live_streams`).then(r => { $('progressBar').firstElementChild.style.width = '40%'; return r; }),
+      fetchJSON(`${base}&action=get_vod_streams`).then(r => { $('progressBar').firstElementChild.style.width = '70%'; return r; }),
+      fetchJSON(`${base}&action=get_series`).then(r => { $('progressBar').firstElementChild.style.width = '95%'; return r; })
+    ]);
+
+    const todosLive = (live || []).filter(c => c && c.name);
+    const todosVod = (vod || []).filter(c => c && c.name);
+    const todosSeries = (series || []).filter(c => c && c.name);
+
+    datos.live = todosLive.filter(c => !esAdulto(c));
+    datos.vod = todosVod.filter(c => !esAdulto(c));
+    datos.series = todosSeries.filter(c => !esAdulto(c));
+    datos.adult = [
+      ...todosLive.filter(c => esAdulto(c)).map(c => ({...c, _tipo: 'live'})),
+      ...todosVod.filter(c => esAdulto(c)).map(c => ({...c, _tipo: 'vod'})),
+      ...todosSeries.filter(c => esAdulto(c)).map(c => ({...c, _tipo: 'series'}))
+    ];
+
+    categorias.live = construirCategorias(datos.live);
+    categorias.vod = construirCategorias(datos.vod);
+    categorias.series = construirCategorias(datos.series);
+    categorias.adult = construirCategorias(datos.adult);
+
+    $('progressBar').firstElementChild.style.width = '100%';
+
+    try {
+      sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+        ts: Date.now(), srv: servidor, datos, categorias
+      }));
+    } catch(e){}
+
+    finalizarCarga();
+  } catch (e) {
+    console.error(e);
+    $('loaderText').textContent = 'Error al cargar. Pulsa ↻ para reintentar.';
+    cargando = false;
+  }
+}
+
+function construirCategorias(lista) {
+  const map = {};
+  lista.forEach(item => {
+    const pais = detectarPais(item);
+    const cat = detectarCategoria(item);
+    let grupoKey, grupoFlag, grupoNombre;
+    if (pais) {
+      grupoKey = pais.code; grupoFlag = pais.flag; grupoNombre = pais.name;
+    } else {
+      grupoKey = cat.key; grupoFlag = cat.icon; grupoNombre = cat.key;
+    }
+    if (!map[grupoKey]) {
+      map[grupoKey] = { key: grupoKey, flag: grupoFlag, name: grupoNombre, items: [] };
+    }
+    map[grupoKey].items.push(item);
+  });
+  return Object.values(map).sort((a, b) => {
+    const aEsPais = PAISES.some(p => p.code === a.key);
+    const bEsPais = PAISES.some(p => p.code === b.key);
+    if (aEsPais && !bEsPais) return -1;
+    if (!aEsPais && bEsPais) return 1;
+    return a.name.localeCompare(b.name);
+  });
+}
+
+async function fetchJSON(url) {
+  try {
+    const r = await fetch(url, { cache: 'no-store' });
+    if (!r.ok) return [];
+    const j = await r.json();
+    return Array.isArray(j) ? j : [];
+  } catch (e) { return []; }
+}
+
+function finalizarCarga() {
+  $('loader').style.display = 'none';
+  $('countLive').textContent = datos.live.length;
+  $('countVod').textContent = datos.vod.length;
+  $('countSeries').textContent = datos.series.length;
+  cargando = false;
+  cambiarTab(tabActual);
+}
+
+async function recargar() {
+  sessionStorage.removeItem(CACHE_KEY);
+  datos = { live: [], vod: [], series: [], adult: [] };
+  categorias = { live: [], vod: [], series: [], adult: [] };
+  renderizados = 0;
+  filtrados = [];
+  categoriaActual = '__ALL__';
+  await cargarTodo(true);
+}
+
+function cambiarTab(tab) {
+  if (tab === 'adult' && !adultUnlocked) { pedirPinAdulto(); return; }
+  tabActual = tab;
+  categoriaActual = '__ALL__';
+  document.querySelectorAll('.mtab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  $('busca').value = '';
+  $('searchClear').classList.remove('show');
+  if (tab === 'fav') {
+    $('subBar').innerHTML = '';
+    aplicarFiltroFav();
+  } else {
+    renderSubBar();
+    aplicarFiltro();
+  }
+}
+
+function renderSubBar() {
+  const bar = $('subBar');
+  bar.innerHTML = '';
+  const cats = categorias[tabActual] || [];
+  if (!cats.length) return;
+
+  const allChip = document.createElement('div');
+  allChip.className = 'chip active';
+  if (tabActual === 'adult') allChip.classList.add('adult');
+  allChip.innerHTML = `🌐 TODOS <span class="c-count">${(datos[tabActual] || []).length}</span>`;
+  allChip.onclick = () => {
+    categoriaActual = '__ALL__';
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    allChip.classList.add('active');
+    aplicarFiltro();
+  };
+  bar.appendChild(allChip);
+
+  const favChip = document.createElement('div');
+  favChip.className = 'chip fav';
+  const nFav = Object.values(favoritos).filter(f => (f._tipo || '') === tabActual).length;
+  favChip.innerHTML = `⭐ Solo favs <span class="c-count">${nFav}</span>`;
+  favChip.onclick = () => {
+    categoriaActual = '__FAV_ONLY__';
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+    favChip.classList.add('active');
+    aplicarFiltro();
+  };
+  if (categoriaActual === '__FAV_ONLY__') {
+    allChip.classList.remove('active');
+    favChip.classList.add('active');
+  }
+  bar.appendChild(favChip);
+
+  cats.forEach(cat => {
+    const chip = document.createElement('div');
+    chip.className = 'chip';
+    if (tabActual === 'adult') chip.classList.add('adult');
+    if (categoriaActual === cat.key) {
+      chip.classList.add('active');
+      allChip.classList.remove('active');
+    }
+    chip.innerHTML = `${cat.flag} ${esc(cat.name)} <span class="c-count">${cat.items.length}</span>`;
+    chip.onclick = () => {
+      categoriaActual = cat.key;
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      aplicarFiltro();
+    };
+    bar.appendChild(chip);
+  });
+}
+
+function normalizarTexto(s) {
+  return String(s || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+}
+
+function coincideBusqueda(nombre, terminos) {
+  if (!terminos.length) return true;
+  const n = normalizarTexto(nombre);
+  return terminos.every(t => n.includes(t));
+}
+
+function aplicarFiltro() {
+  const q = ($('busca').value || '').trim();
+  const terminos = normalizarTexto(q).split(' ').filter(Boolean);
+  let base;
+
+  if (categoriaActual === '__FAV_ONLY__') {
+    base = Object.values(favoritos).filter(f => (f._tipo || '') === tabActual);
+  } else if (categoriaActual === '__ALL__') {
+    base = [...(datos[tabActual] || [])];
+  } else {
+    const cat = (categorias[tabActual] || []).find(c => c.key === categoriaActual);
+    base = cat ? [...cat.items] : [];
+  }
+
+  if (terminos.length) {
+    base = base.filter(c => coincideBusqueda(c.name, terminos));
+  }
+
+  if (terminos.length) {
+    const first = terminos[0];
+    base.sort((a, b) => {
+      const an = normalizarTexto(a.name);
+      const bn = normalizarTexto(b.name);
+      const aStarts = an.startsWith(first) ? 0 : 1;
+      const bStarts = bn.startsWith(first) ? 0 : 1;
+      if (aStarts !== bStarts) return aStarts - bStarts;
+      return an.localeCompare(bn);
+    });
+  } else {
+    base.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  }
+
+  filtrados = base;
+
+  const sh = $('sectionHeader');
+  if (categoriaActual !== '__ALL__' && categoriaActual !== '__FAV_ONLY__') {
+    const cat = (categorias[tabActual] || []).find(c => c.key === categoriaActual);
+    if (cat) {
+      sh.style.display = 'flex';
+      $('sectionTitle').textContent = `${cat.flag} ${cat.name}`;
+      $('sectionBadge').textContent = `${cat.items.length} elementos`;
+    }
+  } else {
+    sh.style.display = 'none';
+  }
+
+  $('grid').innerHTML = '';
+  renderizados = 0;
+  if (observer) { observer.disconnect(); observer = null; }
+  renderizarLote();
+}
+
+function aplicarFiltroFav() {
+  const q = ($('busca').value || '').trim();
+  const terminos = normalizarTexto(q).split(' ').filter(Boolean);
+  let base = Object.values(favoritos);
+  if (terminos.length) base = base.filter(c => coincideBusqueda(c.name, terminos));
+  base.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+  filtrados = base;
+  $('sectionHeader').style.display = 'none';
+  $('grid').innerHTML = '';
+  renderizados = 0;
+  if (observer) { observer.disconnect(); observer = null; }
+  renderizarLote();
+}
+
+function onBuscaInput() {
+  const v = $('busca').value;
+  $('searchClear').classList.toggle('show', v.length > 0);
+  clearTimeout(busquedaTimeout);
+  busquedaTimeout = setTimeout(() => {
+    if (tabActual === 'fav') aplicarFiltroFav();
+    else aplicarFiltro();
+  }, 200);
+}
+
+function limpiarBusca() {
+  $('busca').value = '';
+  $('searchClear').classList.remove('show');
+  if (tabActual === 'fav') aplicarFiltroFav();
+  else aplicarFiltro();
+}
+
+function renderizarLote() {
+  const grid = $('grid');
+  $('empty').style.display = 'none';
+
+  if (filtrados.length === 0) {
+    $('empty').style.display = 'block';
+    $('info').textContent = '';
+    if (tabActual === 'fav') $('emptyText').textContent = 'Aún no tienes favoritos. Pulsa ⭐ en cualquier canal.';
+    else if ($('busca').value.trim()) $('emptyText').textContent = `Sin resultados para "${$('busca').value.trim()}"`;
+    else $('emptyText').textContent = 'No hay resultados';
+    return;
+  }
+
+  const fin = Math.min(renderizados + LOTE, filtrados.length);
+  const frag = document.createDocumentFragment();
+  for (let i = renderizados; i < fin; i++) {
+    frag.appendChild(crearCard(filtrados[i]));
+  }
+  grid.appendChild(frag);
+  renderizados = fin;
+
+  $('info').textContent = `${renderizados} de ${filtrados.length}`;
+
+  if (renderizados < filtrados.length) {
+    if (observer) observer.disconnect();
+    const sentinel = document.createElement('div');
+    sentinel.id = 'sentinel';
+    sentinel.style.cssText = 'height:20px;grid-column:1/-1;';
+    grid.appendChild(sentinel);
+    observer = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting) {
+        observer.disconnect();
+        const s = $('sentinel');
+        if (s) s.remove();
+        renderizarLote();
+      }
+    }, { rootMargin: '400px' });
+    observer.observe(sentinel);
+  }
+}
+
+function crearCard(item) {
+  const el = document.createElement('div');
+  el.className = 'card';
+  const esAdultoTab = (item._tipo === 'adult') || tabActual === 'adult';
+  if (esAdultoTab) el.classList.add('adult');
+  const isFav = esFavorito(item);
+  if (isFav) el.classList.add('is-fav');
+
+  const icono = item.stream_icon || item.cover || item.movie_image || '';
+  const inicial = (item.name || '?').charAt(0).toUpperCase();
+
+  const imgHtml = icono && icono.startsWith('http')
+    ? `<img src="${esc(icono)}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><div class="placeholder" style="display:none;">${esc(inicial)}</div>`
+    : `<div class="placeholder">${esc(inicial)}</div>`;
+
+  let badges = '';
+  const pais = detectarPais(item);
+  if (pais && !esAdultoTab) badges += `<span class="badge country">${pais.flag}</span>`;
+  if (esAdultoTab) badges += `<span class="badge adult">🔞</span>`;
+  else if ((item._tipo === 'vod' || item._tipo === 'series') || tabActual === 'vod' || tabActual === 'series') {
+    if (item.rating && parseFloat(item.rating) > 0) badges += `<span class="badge rating">⭐ ${esc(item.rating)}</span>`;
+  }
+  if (item.tv_archive) badges += `<span class="badge catchup">⏪</span>`;
+
+  el.innerHTML = `
+    <button class="star-btn ${isFav ? 'active' : ''}" title="Favorito">${isFav ? '★' : '☆'}</button>
+    <div class="card-img">${imgHtml}</div>
+    <div class="card-body">
+      <div class="card-title">${esc(item.name)}</div>
+      ${badges ? `<div class="card-badges">${badges}</div>` : ''}
+    </div>
+  `;
+
+  const starBtn = el.querySelector('.star-btn');
+  starBtn.onclick = (e) => {
+    e.stopPropagation();
+    const nowFav = toggleFavorito(item);
+    starBtn.textContent = nowFav ? '★' : '☆';
+    starBtn.classList.toggle('active', nowFav);
+    el.classList.toggle('is-fav', nowFav);
+    actualizarBadgeFav();
+    if (tabActual === 'fav' && !nowFav) {
+      el.style.transition = 'opacity 0.3s, transform 0.3s';
+      el.style.opacity = '0';
+      el.style.transform = 'scale(0.8)';
+      setTimeout(() => {
+        el.remove();
+        filtrados = filtrados.filter(x => itemUID(x) !== itemUID(item));
+        renderizados = Math.max(0, renderizados - 1);
+        if (filtrados.length === 0) renderizarLote();
+        else $('info').textContent = `${renderizados} de ${filtrados.length}`;
+      }, 300);
+    }
+    if (categoriaActual === '__FAV_ONLY__') aplicarFiltro();
+  };
+
+  el.onclick = () => abrirItem(item);
+  return el;
+}
+
+function construirURL(item) {
+  const tipo = item._tipo || tabActual;
+  const u = encodeURIComponent(usuario);
+  const p = encodeURIComponent(senha);
+
+  if (tipo === 'live') {
+    const id = item.stream_id;
+    const ext = item.container_extension || 'm3u8';
+    return `${servidor}/live/${u}/${p}/${id}.${ext}`;
+  } else if (tipo === 'vod') {
+    const ext = item.container_extension || 'mp4';
+    return `${servidor}/movie/${u}/${p}/${item.stream_id}.${ext}`;
+  } else if (tipo === 'series') {
+    const ext = item.container_extension || 'mp4';
+    return `${servidor}/series/${u}/${p}/${item.id || item.stream_id}.${ext}`;
+  }
+  return '';
+}
+
+function abrirItem(item) {
+  const tipo = item._tipo || tabActual;
+  if (tipo === 'series') {
+    abrirSerie(item);
+    return;
+  }
+  const url = construirURL(item);
+  reproducir(url, item.name, item);
+}
+
+async function abrirSerie(serie) {
+  $('episodesTitulo').textContent = serie.name;
+  $('episodesBody').innerHTML = '<div class="loader"><div class="spinner"></div><div class="loader-text">Cargando episodios...</div></div>';
+  $('episodesModal').classList.add('active');
+  if (episodiosCache[serie.series_id]) {
+    renderEpisodios(serie, episodiosCache[serie.series_id]);
+    return;
+  }
+  try {
+    const url = `${servidor}/player_api.php?username=${encodeURIComponent(usuario)}&password=${encodeURIComponent(senha)}&action=get_series_info&series_id=${serie.series_id}`;
+    const info = await fetchJSON(url);
+    if (!info.episodes) throw new Error('Sin episodios');
+    episodiosCache[serie.series_id] = info.episodes;
+    renderEpisodios(serie, info.episodes);
+  } catch (e) {
+    console.error(e);
+    $('episodesBody').innerHTML = '<div class="empty"><div class="icon">⚠</div><div>Error al cargar episodios</div></div>';
+  }
+}
+
+function renderEpisodios(serie, episodes) {
+  const temporadas = Object.keys(episodes).sort((a, b) => parseInt(a) - parseInt(b));
+  let html = '';
+  temporadas.forEach(temp => {
+    const eps = episodes[temp];
+    if (!eps || !eps.length) return;
+    html += `
+      <div class="season-group">
+        <div class="season-title">▶ TEMPORADA ${esc(temp)}</div>
+        <div class="episodes-list">
+          ${eps.map(ep => `
+            <div class="episode-item" onclick="reproducirEpisodio('${esc(ep.id)}', '${esc(serie.name)} T${esc(temp)}E${esc(ep.episode_num)}', '${esc(ep.container_extension || 'mp4')}')">
+              <div class="episode-num">E${esc(ep.episode_num)}</div>
+              <div class="episode-title">${esc(ep.title || 'Episodio ' + ep.episode_num)}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  });
+  $('episodesBody').innerHTML = html || '<div class="empty">Sin episodios</div>';
+}
+
+function reproducirEpisodio(epId, titulo, ext) {
+  cerrarEpisodios();
+  const url = `${servidor}/series/${encodeURIComponent(usuario)}/${encodeURIComponent(senha)}/${epId}.${ext || 'mp4'}`;
+  reproducir(url, titulo, null);
+}
+
+function cerrarEpisodios() {
+  $('episodesModal').classList.remove('active');
+}
+
+function detectarFormato(url) {
+  const lower = url.toLowerCase().split('?')[0].split('#')[0];
+  if (lower.endsWith('.m3u8') || lower.includes('.m3u8')) return 'hls';
+  if (lower.endsWith('.mpd')) return 'dash';
+  if (lower.endsWith('.ts') || lower.endsWith('.mpegts')) return 'mpegts';
+  if (lower.endsWith('.mp4') || lower.endsWith('.mkv') || lower.endsWith('.avi') ||
+      lower.endsWith('.mov') || lower.endsWith('.webm') || lower.endsWith('.flv') ||
+      lower.endsWith('.m4v') || lower.endsWith('.ogv') || lower.endsWith('.3gp')) return 'native';
+  if (url.includes('/live/')) return 'hls';
+  return 'native';
+}
+
+function limpiarReproductores() {
+  if (hlsInstance) { try { hlsInstance.destroy(); } catch(e){} hlsInstance = null; }
+  if (dashInstance) { try { dashInstance.reset(); } catch(e){} dashInstance = null; }
+  if (mpegtsPlayer) { try { mpegtsPlayer.destroy(); } catch(e){} mpegtsPlayer = null; }
+}
+
+function reproducir(url, titulo, item) {
+  urlActual = url;
+  itemActual = item;
+  $('playerTitulo').textContent = titulo || 'Reproduciendo';
+  $('playerModal').classList.add('active');
+
+  const btnStar = $('btnStarPlayer');
+  if (item) {
+    const isFav = esFavorito(item);
+    btnStar.textContent = isFav ? '★' : '☆';
+    btnStar.classList.toggle('active', isFav);
+    btnStar.style.display = 'inline-block';
+  } else {
+    btnStar.style.display = 'none';
+  }
+
+  const video = $('videoEl');
+  const wrap = $('videoWrap');
+
+  limpiarReproductores();
+  wrap.querySelectorAll('.video-error, .video-spinner, .video-status').forEach(el => el.remove());
+
+  try { video.pause(); } catch(e){}
+  video.removeAttribute('src');
+  while (video.firstChild) video.removeChild(video.firstChild);
+  try { video.load(); } catch(e){}
+
+  const spinner = document.createElement('div');
+  spinner.className = 'video-spinner';
+  wrap.appendChild(spinner);
+
+  const status = document.createElement('div');
+  status.className = 'video-status';
+  status.textContent = 'Conectando...';
+  wrap.appendChild(status);
+
+  const clearUI = () => {
+    const s = wrap.querySelector('.video-spinner');
+    if (s) s.remove();
+    const st = wrap.querySelector('.video-status');
+    if (st) st.remove();
+  };
+
+  video.addEventListener('loadeddata', clearUI, { once: true });
+  video.addEventListener('playing', clearUI, { once: true });
+
+  const timeoutId = setTimeout(() => {
+    if (video.readyState < 2) {
+      clearUI();
+      mostrarErrorVideo('El canal tardó demasiado en cargar. Puede estar offline o el servidor no responde.', url);
+    }
+  }, 15000);
+  video.addEventListener('loadeddata', () => clearTimeout(timeoutId), { once: true });
+
+  const formato = detectarFormato(url);
+
+  video.onerror = () => {
+    clearUI();
+    if (formato === 'hls' && window.Hls && Hls.isSupported() && !hlsInstance) {
+      intentarHLS(url, video, wrap, clearUI);
+      return;
+    }
+    mostrarErrorVideo('No se pudo reproducir. Formato no soportado o canal offline.', url);
+  };
+
+  if (formato === 'hls') {
+    if (video.canPlayType('application/vnd.apple.mpegurl') && !/Chrome|Firefox/i.test(navigator.userAgent)) {
+      video.src = url;
+      video.play().catch(() => {});
+    } else if (window.Hls && Hls.isSupported()) {
+      intentarHLS(url, video, wrap, clearUI);
+    } else {
+      video.src = url;
+      video.play().catch(() => {});
+    }
+  } else if (formato === 'dash') {
+    if (window.dashjs) {
+      dashInstance = dashjs.MediaPlayer().create();
+      dashInstance.initialize(video, url, true);
+      dashInstance.on('error', () => {
+        clearUI();
+        mostrarErrorVideo('Error DASH. Canal no disponible.', url);
+      });
+    } else {
+      video.src = url;
+    }
+  } else if (formato === 'mpegts') {
+    if (window.mpegts && mpegts.isSupported()) {
+      mpegtsPlayer = mpegts.createPlayer({ type: 'mpegts', url, isLive: true });
+      mpegtsPlayer.attachMediaElement(video);
+      mpegtsPlayer.load();
+      mpegtsPlayer.play().catch(() => {});
+      mpegtsPlayer.on(mpegts.Events.ERROR, (type, detail) => {
+        clearUI();
+        mostrarErrorVideo('Error MPEG-TS. Canal no disponible.', url);
+      });
+    } else {
+      video.src = url;
+    }
+  } else {
+    video.src = url;
+    video.load();
+    video.play().catch((err) => {
+      if (err.name === 'NotAllowedError') {
+        status.textContent = 'Pulsa ▶ para reproducir';
+      }
+    });
+  }
+}
+
+function intentarHLS(url, video, wrap, clearUI) {
+  hlsInstance = new Hls({
+    enableWorker: true,
+    lowLatencyMode: false,
+    backBufferLength: 60,
+    maxBufferLength: 30,
+    maxMaxBufferLength: 120,
+    maxBufferSize: 60 * 1000 * 1000,
+    maxBufferHole: 0.5,
+    manifestLoadingTimeOut: 15000,
+    manifestLoadingMaxRetry: 3,
+    manifestLoadingRetryDelay: 1000,
+    levelLoadingTimeOut: 15000,
+    levelLoadingMaxRetry: 3,
+    fragLoadingTimeOut: 30000,
+    fragLoadingMaxRetry: 4,
+    startLevel: -1,
+    capLevelToPlayerSize: false,
+    debug: false
+  });
+  hlsInstance.loadSource(url);
+  hlsInstance.attachMedia(video);
+
+  hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
+    video.play().catch(() => {});
+  });
+
+  hlsInstance.on(Hls.Events.ERROR, (event, data) => {
+    if (!data.fatal) return;
+    console.warn('HLS fatal:', data.type, data.details);
+    clearUI();
+    if (data.type === Hls.ErrorTypes.NETWORK_ERROR) {
+      setTimeout(() => { try { hlsInstance.startLoad(); } catch(e){ mostrarErrorVideo('Error de red. Canal offline.', url); } }, 1000);
+    } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+      try { hlsInstance.recoverMediaError(); } catch(e){ mostrarErrorVideo('Error de media. Códec no soportado.', url); }
+    } else {
+      mostrarErrorVideo('Error fatal HLS. Canal no disponible.', url);
+    }
+  });
+}
+
+function mostrarErrorVideo(msg, url) {
+  const wrap = $('videoWrap');
+  const old = wrap.querySelector('.video-error');
+  if (old) old.remove();
+  const div = document.createElement('div');
+  div.className = 'video-error';
+  div.innerHTML = `
+    <div class="icon">📡</div>
+    <div class="msg">${esc(msg)}</div>
+    ${url ? `<div class="detalles">${esc(url)}</div>` : ''}
+    <div class="buttons">
+      <button onclick="reintentar()">↻ REINTENTAR</button>
+      <button class="secondary" onclick="cerrarPlayer()">✖ CERRAR</button>
+    </div>
+  `;
+  wrap.appendChild(div);
+}
+
+function reintentar() {
+  const err = document.querySelector('.video-error');
+  if (err) err.remove();
+  if (urlActual) reproducir(urlActual, $('playerTitulo').textContent, itemActual);
+}
+
+function toggleFavActual() {
+  if (!itemActual) return;
+  const nowFav = toggleFavorito(itemActual);
+  const btnStar = $('btnStarPlayer');
+  btnStar.textContent = nowFav ? '★' : '☆';
+  btnStar.classList.toggle('active', nowFav);
+  actualizarBadgeFav();
+}
+
+function limpiarPlayer() {
+  const video = $('videoEl');
+  try { video.pause(); } catch(e){}
+  video.removeAttribute('src');
+  while (video.firstChild) video.removeChild(video.firstChild);
+  try { video.load(); } catch(e){}
+  limpiarReproductores();
+}
+
+function cerrarPlayer() {
+  limpiarPlayer();
+  $('playerModal').classList.remove('active');
+  const wrap = $('videoWrap');
+  wrap.querySelectorAll('.video-error, .video-spinner, .video-status').forEach(el => el.remove());
+  itemActual = null;
+}
+
+function togglePlay() {
+  const v = $('videoEl');
+  if (v.paused) v.play().catch(() => {});
+  else v.pause();
+}
+function stopVideo() {
+  const v = $('videoEl');
+  v.pause();
+  v.currentTime = 0;
+}
+function toggleFullscreen() {
+  const wrap = $('videoWrap');
+  if (!document.fullscreenElement) {
+    (wrap.requestFullscreen || wrap.webkitRequestFullscreen || wrap.msRequestFullscreen).call(wrap).catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+}
+function toggleMute() { $('videoEl').muted = !$('videoEl').muted; }
+function subirVolumen() {
+  const v = $('videoEl');
+  v.volume = Math.min(1, v.volume + 0.1);
+}
+function bajarVolumen() {
+  const v = $('videoEl');
+  v.volume = Math.max(0, v.volume - 0.1);
+}
+
+function pedirPinAdulto() {
+  pinBuffer = '';
+  $('pinInput').value = '';
+  $('pinError').style.display = 'none';
+  $('pinModal').classList.add('active');
+}
+function cerrarPin() {
+  $('pinModal').classList.remove('active');
+  pinBuffer = '';
+  $('pinInput').value = '';
+}
+function pinPress(n) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += n;
+  $('pinInput').value = pinBuffer;
+  if (pinBuffer.length === 4) setTimeout(verificarPin, 200);
+}
+function pinDel() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  $('pinInput').value = pinBuffer;
+}
+function verificarPin() {
+  if (pinBuffer === ADULT_PIN) {
+    adultUnlocked = true;
+    cerrarPin();
+    if (!document.querySelector('.mtab[data-tab="adult"]')) {
+      const tab = document.createElement('div');
+      tab.className = 'mtab adult';
+      tab.dataset.tab = 'adult';
+      tab.onclick = () => cambiarTab('adult');
+      tab.innerHTML = `🔞 Adultos <span class="count" id="countAdult">${datos.adult.length}</span>`;
+      $('mainTabs').appendChild(tab);
+    }
+    cambiarTab('adult');
+  } else {
+    $('pinError').style.display = 'block';
+    pinBuffer = '';
+    $('pinInput').value = '';
+    setTimeout(() => { $('pinError').style.display = 'none'; }, 2000);
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (!$('pinModal').classList.contains('active')) return;
+  if (/^[0-9]$/.test(e.key)) pinPress(e.key);
+  else if (e.key === 'Backspace') pinDel();
+  else if (e.key === 'Enter') verificarPin();
+  else if (e.key === 'Escape') cerrarPin();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if ($('pinModal').classList.contains('active')) cerrarPin();
+    else if ($('playerModal').classList.contains('active')) cerrarPlayer();
+    else if ($('episodesModal').classList.contains('active')) cerrarEpisodios();
+  }
+  if ($('playerModal').classList.contains('active') && !$('pinModal').classList.contains('active')) {
+    if (e.key === ' ' || e.key === 'k') { e.preventDefault(); togglePlay(); }
+    else if (e.key === 'f') toggleFullscreen();
+    else if (e.key === 'm') toggleMute();
+    else if (e.key === 'ArrowUp') { e.preventDefault(); subirVolumen(); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); bajarVolumen(); }
+  }
+});
+
+['servidor','usuario','senha'].forEach(id => {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('keypress', e => { if (e.key === 'Enter') login(); });
+});
+
+/* ========= AUTO-LOGIN Y LECTURA DE CREDENCIALES COMPARTIDAS ========= */
+function autoLoginFromStorage(){
+  const srv = localStorage.getItem('ip2_srv')
+           || localStorage.getItem('iptv2_host')
+           || localStorage.getItem('matrixx_srv');
+  const usr = localStorage.getItem('ip2_usr')
+           || localStorage.getItem('iptv2_user')
+           || localStorage.getItem('matrixx_usr');
+  const pwd = localStorage.getItem('ip2_pwd')
+           || localStorage.getItem('iptv2_pass')
+           || localStorage.getItem('matrixx_pwd');
+
+  if (srv && usr && pwd) {
+    $('servidor').value = srv;
+    $('usuario').value = usr;
+    $('senha').value = pwd;
+    $('lembrar').checked = true;
+    setTimeout(() => login(), 150);
+  } else {
+    $('servidor').value = DEFAULT_SERVER;
+    $('usuario').value = DEFAULT_USER;
+    $('senha').value = DEFAULT_PASS;
+    $('lembrar').checked = true;
+    setTimeout(() => login(), 150);
+  }
+}
+
+window.addEventListener('load', autoLoginFromStorage);
+
+/* ========= POSTMESSAGE (recibe credenciales del padre) ========= */
+window.addEventListener('message', (ev) => {
+  if (!ev.data || ev.data.type !== 'IPTV2_LOGIN') return;
+  const srv = ev.data.host, usr = ev.data.user, pwd = ev.data.pass;
+  if (!srv || !usr || !pwd) return;
+  if (!$('servidor')) return;
+
+  $('servidor').value = srv;
+  $('usuario').value = usr;
+  $('senha').value = pwd;
+  $('lembrar').checked = true;
+
+  localStorage.setItem('ip2_srv', srv);
+  localStorage.setItem('ip2_usr', usr);
+  localStorage.setItem('ip2_pwd', pwd);
+  localStorage.setItem('matrixx_srv', srv);
+  localStorage.setItem('matrixx_usr', usr);
+  localStorage.setItem('matrixx_pwd', pwd);
+
+  if ($('loginBox').style.display !== 'none') {
+    setTimeout(() => login(), 300);
+  }
+});
+</script>
+
+</body>
+</html>
