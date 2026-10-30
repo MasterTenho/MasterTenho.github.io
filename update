@@ -23,8 +23,8 @@
 
   "Canal1": "https://copacotf.desdeparaguay.net/telefuturo/telefuturo_py_alta/playlist.m3u8",
   "Canal1nombre": "Telefuro",
-  "Canal2": "",
-  "Canal2nombre": "",
+  "Canal2": "https://video.hostingcaaguazu.com:19360/brunomasi/brunomasi.m3u8",
+  "Canal2nombre": "Caaguazu",
   "Canal3": "",
   "Canal3nombre": "",
   "Canal4": "",
